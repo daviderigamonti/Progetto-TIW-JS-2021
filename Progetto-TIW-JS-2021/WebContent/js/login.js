@@ -15,9 +15,6 @@
 					else
 						document.getElementById("erroreLogin").textContent = req.message;
 				}
-				else {
-					alert(req.readyState);
-				}
 			});
 		}
 		else

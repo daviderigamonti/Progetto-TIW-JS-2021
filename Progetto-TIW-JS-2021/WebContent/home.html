@@ -3,8 +3,51 @@
 	<head>
 		<meta charset="ISO-8859-1">
 		<title>Home</title>
+		<script src="js/utils.js" charset="utf-8" defer></script>
+		<script src="js/home.js" charset="utf-8" defer></script>
 	</head>
 	<body>
-
+		
+		<div id="menu" class="barraMenu">
+			<table>
+				<tr>
+					<td><input id="bottoneHome" type="button" value="Home"></td>
+					<td><input id="bottoneCarrello" type="button" value="Carrello"></td>
+					<td><input id="bottoneOrdini" type="button" value="Ordini"></td>
+					
+					<td>
+						<form action="#">
+							Inserisci una parola chiave per la ricerca nel catalogo: 
+							<input id="testoRicerca" type="text" name="keyword">
+							<input id="bottoneCerca" type="submit" value="Cerca">
+						</form>
+					</td>
+				</tr>
+			</table>
+			<div id="msgBnvenuto">
+				Felice di vederti <span id="nomeUtente">utente</span>
+			</div>
+			<input id="bottoneLogout" type="button" value="Logout">
+		</div>
+		
+		<div id="ListaVisualizzati">
+			<table class="tabellaCentrata">
+				<tr>
+					<td id="visImmagine" style="text-align: center; padding-right: 5px;">
+						<img width="150" height="150" />
+					</td>
+					<td valign="top">
+						<span id="visCategoria"></span>
+						<br><br>
+						<a id="visNomeLink">
+							<span id="visNome"></span>
+						</a>
+						<span id="visPrezzo"></span>
+						<br><br>
+						<span id="visDescrizione"></span>
+					</td> 
+				</tr>
+			</table>		
+		</div>
 	</body>
 </html>
