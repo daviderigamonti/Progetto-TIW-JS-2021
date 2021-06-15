@@ -65,6 +65,7 @@ public class ControllaLogin extends HttpServlet {
 		} else {
 			request.getSession().setAttribute("utente", usr);
 			response.setStatus(HttpServletResponse.SC_OK);
+			response.getWriter().println(usr.getNome());
 		}
 	}
 	
