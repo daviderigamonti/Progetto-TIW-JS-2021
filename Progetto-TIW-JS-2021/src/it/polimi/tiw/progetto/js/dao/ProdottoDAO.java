@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Queue;
 
 import it.polimi.tiw.progetto.js.beans.Prodotto;
+import it.polimi.tiw.progetto.js.beans.Range;
+import it.polimi.tiw.progetto.js.utils.IdException;
 
 
 public class ProdottoDAO {
@@ -76,7 +78,7 @@ public class ProdottoDAO {
 		return prodotti;
 	}
 	
-	public List<Prodotto> prendiProdottiCercati(String parolaChiave) throws SQLException{
+	public List<Prodotto> prendiProdottiByKeyword(String parolaChiave) throws SQLException{
 		List<Prodotto> prodotti = new ArrayList<Prodotto>();
 		String parametro = "%"+parolaChiave+"%";
 		//TODO: query da cambiare? 
@@ -106,7 +108,7 @@ public class ProdottoDAO {
 		return prodotti;
 	}
 	
-	public List<Prodotto> prendiOfferteByIdProdotto(int ID) throws SQLException{ 
+	public List<Prodotto> prendiOfferteByIdProdotto(int ID) throws SQLException, IdException{ 
 		List<Prodotto> prodotti = new ArrayList<Prodotto>();
 		FornitoreDAO fornitoreDAO = new FornitoreDAO(connection);
 		
@@ -119,6 +121,8 @@ public class ProdottoDAO {
 		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
 			pstatement.setInt(1, ID);
 			try (ResultSet result = pstatement.executeQuery();) {
+				if (!result.isBeforeFirst()) // no results
+					throw new IdException();
 				while (result.next()) {
 					Prodotto prodotto = new Prodotto();
 					prodotto.setID(result.getInt("Id"));
@@ -141,8 +145,7 @@ public class ProdottoDAO {
 		return prodotti;
 	}
 
-	
-	public Prodotto prendiProdottoByIdProdottoFornitore(int IdProdotto, int IdFornitore) throws SQLException{
+	public Prodotto prendiProdottoByIdProdottoFornitore(int idProdotto, int idFornitore) throws SQLException, IdException{
 		FornitoreDAO fornitoreDAO = new FornitoreDAO(connection);
 		Prodotto prodotto = new Prodotto();
 		String query = "select * from prodotto pr, vendita v, fornitore f, politica po "
@@ -151,19 +154,19 @@ public class ProdottoDAO {
 
 		
 		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
-			pstatement.setInt(1, IdProdotto);
-			pstatement.setInt(2, IdFornitore);
+			pstatement.setInt(1, idProdotto);
+			pstatement.setInt(2, idFornitore);
 			try (ResultSet result = pstatement.executeQuery();) {
+				if (!result.isBeforeFirst()) // no results
+					throw new IdException();
 				while (result.next()) {
-
-					
-					prodotto.setID(IdProdotto);
+					prodotto.setID(idProdotto);
 					prodotto.setNome(result.getString("Nome"));
 					prodotto.setDescrizione(result.getString("Descrizione"));
 					prodotto.setCategoria(result.getString("Categoria"));	
 					prodotto.setPrezzo(result.getFloat("Prezzo"));
 					
-					prodotto.setFornitore(fornitoreDAO.prendiFornitoreById(prodotto.getFornitore().getID()));
+					prodotto.setFornitore(fornitoreDAO.prendiFornitoreById(idFornitore));
 
 					Blob immagineBlob= result.getBlob("Immagine");
 					byte[] byteData = immagineBlob.getBytes(1, (int) immagineBlob.length()); 
@@ -176,7 +179,7 @@ public class ProdottoDAO {
 		return prodotto;
 	}
 	
-	public Prodotto prendiProdottoById(int ID) throws SQLException{
+	public Prodotto prendiProdottoById(int ID) throws SQLException, IdException{
 		Prodotto prodotto = new Prodotto();
 		String query = "select * "
 				+ "from prodotto p join vendita v1 on p.Id=v1.IdProdotto "
@@ -185,7 +188,9 @@ public class ProdottoDAO {
 		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
 			pstatement.setInt(1, ID);
 			try (ResultSet result = pstatement.executeQuery();) {
-				if (result.next()) {
+				if (!result.isBeforeFirst()) // no results
+					throw new IdException();
+				else if (result.next()) {
 					prodotto.setID(result.getInt("Id"));
 					prodotto.setNome(result.getString("Nome"));
 					prodotto.setDescrizione(result.getString("Descrizione"));
@@ -199,5 +204,17 @@ public class ProdottoDAO {
 			}
 		}
 		return prodotto;
+	}
+	
+	public boolean esisteProdotto(int idProd) throws SQLException {
+		String query = "select * from prodotto p where p.Id = ?"; 
+		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
+			pstatement.setInt(1, idProd);
+			try (ResultSet result = pstatement.executeQuery();) {
+				if (!result.isBeforeFirst()) // no results
+					return false;
+				return true;
+			}
+		}
 	}
 }

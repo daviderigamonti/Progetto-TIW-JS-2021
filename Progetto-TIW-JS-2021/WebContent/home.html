@@ -5,6 +5,7 @@
 		<title>Home</title>
 		<script src="js/utils.js" charset="utf-8" defer></script>
 		<script src="js/home.js" charset="utf-8" defer></script>
+		<link rel="stylesheet" href="css/style.css">
 	</head>
 	<body>
 		
@@ -16,9 +17,9 @@
 					<td><input id="bottoneOrdini" type="button" value="Ordini"></td>
 					
 					<td>
-						<form action="#">
+						<form id="formRicerca" action="#">
 							Inserisci una parola chiave per la ricerca nel catalogo: 
-							<input id="testoRicerca" type="text" name="keyword">
+							<input id="testoRicerca" type="text" name="keyword" required>
 							<input id="bottoneRicerca" type="button" value="Cerca">
 						</form>
 					</td>
@@ -32,60 +33,19 @@
 		
 		<div id="messaggioErrore"></div>
 		
-		<div id="ListaVisualizzati">
-			<table class="tabellaCentrata">
+		<div id="listaRisultati" class="divCentrato">
+			<table id="tabellaRisultati" class="tabellaRisultati">
 				<tr>
-					<td id="visImmagine" style="text-align: center; padding-right: 5px;">
-						<img width="150" height="150" />
-					</td>
-					<td valign="top">
-						<span id="visCategoria"></span>
-						<br><br>
-						<a id="visNomeLink">
-							<span id="visNome"></span>
-						</a>
-						<span id="visPrezzo"></span>
-						<br><br>
-						<span id="visDescrizione"></span>
-					</td> 
-				</tr>
-			</table>		
-		</div>
-		
-		<div id="ListaRisultati">
-			<table class="tabellaCentrata">
-				<tr>
-					<td>
-						<table style="width: 100%;">
-							<tr>
-								<td id="risImmagine" style="text-align: center; padding-right: 5px;">
-									<img width="150" height="150" />
-								</td>
-								<td valign="top">
-									<span id="risCategoria"></span>
-									<br><br>
-									<a id="risNomeLink">
-										<span id="risNome"></span>
-									</a>
-									<span id="risPrezzo"></span>
-									<br><br>
-									<span id="risDescrizione"></span>
-								</td> 
-							</tr>
-							<tr>
-								<td colspan="2" style="padding-left: 155px;">
-									<table>
-										<tr id="risOfferta"></tr>
-									</table>
-								</td>
-							</tr>
+					<td colspan="2" style="padding-left: 155px;">
+						<table>
+							<tr id="risOfferta"></tr>
 						</table>
 					</td>
 				</tr>
 			</table>		
 		</div>
 		
-		<div id="ListaCarrello">
+		<div id="listaCarrello">
 			<table class="tabellaCentrata">
 				<tr>
 					<td>

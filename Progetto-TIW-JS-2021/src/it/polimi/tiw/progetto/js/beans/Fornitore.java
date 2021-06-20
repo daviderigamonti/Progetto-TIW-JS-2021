@@ -18,40 +18,33 @@ public class Fornitore {
 	public int getID() {
 		return ID;
 	}
-	
 	public void setID(int iD) {
 		ID = iD;
 	}
-	
 	public String getNome() {
 		return nome;
 	}
-	
 	public void setNome(String nome) {
 		this.nome = nome;
 	}
-	
 	public String getValutazione() {
 		return valutazione;
 	}
-	
 	public void setValutazione(String valutazione) {
 		this.valutazione = valutazione;
 	}
-	
 	public int getSoglia() {
 		return soglia;
 	}
-	
 	public void setSoglia(int soglia) {
 		this.soglia = soglia;
 	}
-	
 	public List<Range> getPolitica() {
 		return politica;
 	}
-	
 	public void setPolitica(List<Range> politica) {
 		this.politica = politica;
 	}
+	
+	
 }
