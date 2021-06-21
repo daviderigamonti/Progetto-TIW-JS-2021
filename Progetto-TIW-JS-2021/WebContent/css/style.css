@@ -75,3 +75,8 @@ table.tabellaProdotti, table.tabellaRisultati, div.divCentrato  a:link, a:visite
       text-decoration: none;
       color: black;
 }
+/*
+td, tr, table{
+	border: 2px solid black;
+}
+*/

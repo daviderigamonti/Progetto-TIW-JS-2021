@@ -1,23 +1,15 @@
 package it.polimi.tiw.progetto.js.dao;
 
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import it.polimi.tiw.progetto.js.beans.Carrello;
-import it.polimi.tiw.progetto.js.beans.Fornitore;
 import it.polimi.tiw.progetto.js.beans.Ordine;
 import it.polimi.tiw.progetto.js.beans.Prodotto;
-import it.polimi.tiw.progetto.js.beans.Range;
 import it.polimi.tiw.progetto.js.utils.CalcoloCosti;
 import it.polimi.tiw.progetto.js.utils.IdException;
 
@@ -53,6 +45,10 @@ public class OrdineDAO {
 		ProdottoDAO prodottoDAO = new ProdottoDAO(connection);
 		IndirizzoDAO indirizzoDAO = new IndirizzoDAO(connection);
 		
+		Date data = new Date();
+		int IdFornitore = -1;
+		int IdIndirizzo = -1;
+		
 		for(Integer idOrdine : idOrdini) {
 
 			Ordine ordine = new Ordine();
@@ -69,11 +65,15 @@ public class OrdineDAO {
 								Integer.parseInt(result.getString("IdFornitore")));
 						prodotto.setQuantita(Integer.parseInt(result.getString("Quantita")));
 						prodotti.add(prodotto);
-
-						ordine.setData(result.getDate("Data"));
-						ordine.setFornitore(fornitoreDAO.prendiFornitoreById(Integer.parseInt(result.getString("IdFornitore"))));
-						ordine.setIndirizzo(indirizzoDAO.prendiIndirizzoById(Integer.parseInt(result.getString("IdIndirizzo"))));
+						
+						data = result.getDate("Data");
+						IdFornitore = Integer.parseInt(result.getString("IdFornitore"));
+						IdIndirizzo = Integer.parseInt(result.getString("IdIndirizzo"));
 					}
+					
+					ordine.setData(data);
+					ordine.setFornitore(fornitoreDAO.prendiFornitoreById(IdFornitore));
+					ordine.setIndirizzo(indirizzoDAO.prendiIndirizzoById(IdIndirizzo));
 					ordine.setId(idOrdine);
 					ordine.setProdotti(prodotti);
 					ordine.setTotale(CalcoloCosti.calcolaTotale(prodotti, ordine.getFornitore()));

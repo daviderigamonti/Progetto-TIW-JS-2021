@@ -71,7 +71,7 @@
 			riga1.appendChild(cellaNome);
 			
 			cellaPrezzo = document.createElement("td");
-			cellaPrezzo.textContent = prodotto.prezzo + " \u20AC";
+			cellaPrezzo.textContent = prodotto.prezzo.toFixed(2) + " \u20AC";
 			riga1.appendChild(cellaPrezzo);
 			
 			cellaDescrizione = document.createElement("td");
@@ -113,37 +113,71 @@
 			
 			offerte.forEach((offerta) => {
 			
-				var rigaOff1, rigaOff2, cellaFornitore, cellaSogliaGratis, 
-					cellaNProdotti, cellaTotale, cellaCarrello;
+				var rigaOff = new Array();
+				var cellaFornitore, cellaCarrello, formCarrello, numberCarrello, bottoneCarrello;
 				
-				rigaOff1 = document.createElement("tr");
-				self.tabellaOfferte.appendChild(rigaOff1);
-				
-				rigaOff2 = document.createElement("tr");
-				self.tabellaOfferte.appendChild(rigaOff2);
+				rigaOff[0] = document.createElement("tr");
+				self.tabellaOfferte.appendChild(rigaOff[0]);
 				
 				cellaFornitore = document.createElement("td");
-				cellaFornitore.textContent = offerta.fornitore.nome;
-				rigaOff1.appendChild(cellaFornitore);
+				cellaFornitore.textContent =	offerta.fornitore.nome + " - " + 
+												offerta.fornitore.valutazione + " \u2605 - " + 
+												offerta.prezzo.toFixed(2) + " \u20AC";
+				cellaFornitore.rowSpan = offerta.fornitore.politica.length;
+				rigaOff[0].appendChild(cellaFornitore);
 				
-				cellaSogliaGratis = document.createElement("td");
-				cellaSogliaGratis.textContent = offerta.fornitore.soglia;
-				rigaOff2.appendChild(cellaSogliaGratis);
-				
-				cellaNProdotti = document.createElement("td");
-				cellaNProdotti.textContent = offerta.quantita;
-				rigaOff2.appendChild(cellaNProdotti);
-				
-				cellaTotale = document.createElement("td");
-				cellaTotale.textContent = offerta.valore;
-				rigaOff2.appendChild(cellaTotale);
+				for(let i = 0; i < offerta.fornitore.politica.length; i++) {
+					
+					var politica = offerta.fornitore.politica[i];
+					var rigaPolitica, cellaSpedizione, cellaMinimo, cellaMassimo
+					
+					if(rigaOff[i] !== undefined)
+						rigaPolitica = rigaOff[i];
+					else {
+						rigaPolitica = document.createElement("tr");
+						self.tabellaOfferte.appendChild(rigaPolitica);
+					}
+					
+					cellaSpedizione = document.createElement("td");
+					cellaSpedizione.textContent = 	"Fascia di spedizione: " + 
+													politica.prezzo.toFixed(2) + " \u20AC";
+					rigaPolitica.appendChild(cellaSpedizione);
+					
+					cellaMinimo = document.createElement("td");
+					cellaMinimo.textContent = "Numero minimo prodotti: " + politica.min;
+					rigaPolitica.appendChild(cellaMinimo);
+					
+					cellaMassimo = document.createElement("td");
+					cellaMassimo.textContent = "Numero massimo prodotti: " + politica.max;
+					rigaPolitica.appendChild(cellaMassimo);
+				}
 				
 				cellaCarrello = document.createElement("td");
-				cellaCarrello.textContent = "carrello da fare";
-				rigaOff2.appendChild(cellaCarrello);
-			
-				//TODO: singole fasce prezzo spedizione
+				cellaCarrello.rowSpan = offerta.fornitore.politica.length;
+				cellaCarrello.style = "white-space:pre"; 
+				cellaCarrello.textContent = "La soglia per la spedizione gratis \xE9 di " + 
+											offerta.fornitore.soglia + " \u20AC" + "\n\n" +
+											"Numero di prodotti gi\xE1 nel carrello: " + 
+											offerta.quantita + "\n\n" +
+											"Valore dei prodotti gi\xE1 nel carrello: " + 
+											offerta.valore + " \u20AC" + "\n\n";
+				rigaOff[0].appendChild(cellaCarrello);
 				
+				formCarrello = document.createElement("form");
+				formCarrello.action = "#";
+				cellaCarrello.appendChild(formCarrello);
+				
+				numberCarrello = document.createElement("input");
+				numberCarrello.type = "number";
+				numberCarrello.min = "1";
+				numberCarrello.value = "1";
+				formCarrello.appendChild(numberCarrello);
+				
+				bottoneCarrello = document.createElement("input");
+				bottoneCarrello.type = "button";
+				bottoneCarrello.value = "Inserisci";
+				formCarrello.appendChild(bottoneCarrello);
+				//TODO funzione aggiunta al carrello
 			});
 		}
 		
