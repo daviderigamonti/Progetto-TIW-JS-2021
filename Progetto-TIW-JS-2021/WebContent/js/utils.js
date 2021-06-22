@@ -25,3 +25,29 @@ function makeCall(httpMethod, url, data, callBack) {
 		req.send(new FormData(data));
 }
 
+function caricaLista(self, httpMethod, url, data) {
+	makeCall(httpMethod, url, data, function(req) {
+		if (req.readyState == 4) {
+			if (req.status == 200) {
+  				var elementi = JSON.parse(req.responseText);
+  				if (elementi.length == 0)
+    				return;
+				self.update(elementi);
+			}
+			else if (req.status == 403) {
+				//TODO
+          		window.location.href = req.getResponseHeader("Location");
+          		window.sessionStorage.removeItem('username');
+			}
+			else 
+				self.alert.textContent = message;
+		}
+	});
+}
+
+function indirizzo(indirizzo) {
+	return 	"Via " + indirizzo.via + " " + 
+			indirizzo.numero + ", " + 
+			indirizzo.citta + ", " + 
+			indirizzo.cap;
+}
