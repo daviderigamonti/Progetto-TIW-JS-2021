@@ -7,11 +7,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
-import java.util.Queue;
 
 import it.polimi.tiw.progetto.js.beans.Prodotto;
-import it.polimi.tiw.progetto.js.beans.Range;
 import it.polimi.tiw.progetto.js.utils.IdException;
 
 
@@ -22,7 +21,7 @@ public class ProdottoDAO {
 		this.connection = connection;
 	}
 	
-	public List<Prodotto> prendiProdotti(Queue<Integer> presenti, int quantita) throws SQLException {
+	public List<Prodotto> prendiProdotti(Collection<Integer> presenti, int quantita) throws SQLException {
 		List<Prodotto> prodotti = new ArrayList<Prodotto>();
 		String query;
 		boolean valido = presenti!=null && !presenti.isEmpty();

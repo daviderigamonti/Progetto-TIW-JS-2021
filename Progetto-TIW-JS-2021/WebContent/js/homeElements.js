@@ -2,28 +2,42 @@
  * Home Elements
  */
 
-function Prodotto(tTabella) {
+function Prodotto(listaProdotti) {
 	
-	this.tTabella = tTabella;
+	this.listaProdotti = listaProdotti;
 	this.offerte;
 	
 	this.update = function(prodotto) {
-		var riga1, riga2, riga3, cellaImmagine, immagine, cellaCategoria, 
-			cellaNome, collegamento, cellaPrezzo, cellaDescrizione, 
-			cellaOfferte, tabellaOfferte; 
-			
+		
 		var self = this;
 		
+		var tabellaProdotto, riga1, riga2, riga3, cellaImmagine, immagine, 
+			cellaCategoria, cellaNome, cellaPrezzo, cellaDescrizione, 
+			cellaOfferte, tabellaOfferte; 
+			
+		var caricaOfferte = (e) => {
+			if(self.offerte.isHidden()) {
+				var idSelezionato = e.target.getAttribute("idProdotto");
+				aggiungiVisualizzato(idSelezionato);
+	      		self.offerte.caricaOfferte(idSelezionato, self.tTabella);
+			}
+			self.offerte.toggleVisibilty();
+		}
+		
+		tabellaProdotto = document.createElement("table");
+		this.listaProdotti.appendChild(tabellaProdotto);
+		
 		riga1 = document.createElement("tr");
-		this.tTabella.appendChild(riga1);
+		tabellaProdotto.appendChild(riga1);
 		
 		riga2 = document.createElement("tr");
-		this.tTabella.appendChild(riga2);
+		tabellaProdotto.appendChild(riga2);
 		
 		riga3 = document.createElement("tr");
 		riga3.colSpan = "4";
-		this.tTabella.appendChild(riga3);
+		tabellaProdotto.appendChild(riga3);
 		
+		// Sezione offerte
 		cellaOfferte = document.createElement("td");
 		cellaOfferte.colSpan = "4";
 		riga3.appendChild(cellaOfferte);
@@ -32,10 +46,9 @@ function Prodotto(tTabella) {
 		tabellaOfferte.className = "tabellaRisultati";
 		cellaOfferte.appendChild(tabellaOfferte);
 		
-		// Tabella offerte
-		this.offerte = new InfoOfferte(tabellaOfferte);
-		this.offerte.hide();
+		this.offerte = new InfoOfferte(riga3, tabellaOfferte);
 		
+		//Sezione immagine
 		cellaImmagine = document.createElement("td");
 		cellaImmagine.rowSpan = "2";
 		riga1.appendChild(cellaImmagine);
@@ -43,26 +56,28 @@ function Prodotto(tTabella) {
 		immagine = document.createElement("img");
 		immagine.src = "data:image/png;base64," + prodotto.immagine;
 		immagine.className = "immagineGrande";
+		immagine.setAttribute("idProdotto", prodotto.ID);
+		immagine.addEventListener("click", caricaOfferte, false);
 		cellaImmagine.appendChild(immagine);
 		
+		//Sezione categoria
 		cellaCategoria = document.createElement("td");
 		cellaCategoria.textContent = prodotto.categoria;
 		riga1.appendChild(cellaCategoria);
 		
+		//Sezione nome
 		cellaNome = document.createElement("td");
-		collegamento = document.createElement("a");
-		collegamento.setAttribute("idProdotto", prodotto.ID);
-		collegamento.textContent = prodotto.nome;
-		collegamento.addEventListener("click", (e) => {
-      		self.offerte.caricaOfferte(e.target.getAttribute("idProdotto"), self.tTabella);
-		}, false);
-		cellaNome.appendChild(collegamento);
+		cellaNome.textContent = prodotto.nome;
+		cellaNome.setAttribute("idProdotto", prodotto.ID);
+		cellaNome.addEventListener("click", caricaOfferte, false);
 		riga1.appendChild(cellaNome);
 		
+		//Sezione prezzo
 		cellaPrezzo = document.createElement("td");
 		cellaPrezzo.textContent = prodotto.prezzo.toFixed(2) + " \u20AC";
 		riga1.appendChild(cellaPrezzo);
 		
+		//Sezione descrizione
 		cellaDescrizione = document.createElement("td");
 		cellaDescrizione.textContent = prodotto.descrizione;
 		cellaDescrizione.colSpan = "3";
@@ -72,21 +87,25 @@ function Prodotto(tTabella) {
 	};
 }
 
-function Ordine(tTabella) {
+function Ordine(listaOrdini) {
 	
-	this.tTabella = tTabella;
+	this.listaOrdini = listaOrdini;
 	
 	this.update = function(ordine) {
-		var riga1, riga2, riga3, cellaAcquisto, cellaIndirizzo, cellaLista, listaProdotti; 
+		var tabellaOrdine, riga1, riga2, riga3, cellaAcquisto, cellaIndirizzo, 
+			cellaLista, listaProdotti; 
+			
+		tabellaOrdine = document.createElement("table");
+		this.listaOrdini.appendChild(tabellaOrdine);
 		
 		riga1 = document.createElement("tr");
-		this.tTabella.appendChild(riga1);
+		tabellaOrdine.appendChild(riga1);
 		
 		riga2 = document.createElement("tr");
-		this.tTabella.appendChild(riga2);
+		tabellaOrdine.appendChild(riga2);
 		
 		riga3 = document.createElement("tr");
-		this.tTabella.appendChild(riga3);
+		tabellaOrdine.appendChild(riga3);
 		
 		cellaAcquisto = document.createElement("td");
 		cellaAcquisto.textContent = "Acquisto effettuato in data " + ordine.data + "\n" +
@@ -118,9 +137,11 @@ function Ordine(tTabella) {
 	};
 }
 
-function InfoOfferte(tabellaOfferte) {//TODO: passare e nascondere anche la riga
+function InfoOfferte(rigaOfferte, tabellaOfferte) {
 	
+	this.rigaOfferte = rigaOfferte;
 	this.tabellaOfferte = tabellaOfferte;
+	this.rigaOfferte.hidden = true;	// Le offerte sono sempre nascoste al momento della creazione
 	
 	this.caricaOfferte = function(idProdotto) {
 		var self = this;
@@ -142,7 +163,6 @@ function InfoOfferte(tabellaOfferte) {//TODO: passare e nascondere anche la riga
 	};
 		
 	this.update = function(offerte) {
-		this.show();
 		this.tabellaOfferte.innerHTML = ""; // Svuota la tabella
 		var self = this;
 		
@@ -216,42 +236,39 @@ function InfoOfferte(tabellaOfferte) {//TODO: passare e nascondere anche la riga
 		});
 	}
 	
-	this.show = () => {
-		this.tabellaOfferte.hidden = false;
-	};
+	this.isHidden = () => {
+		return this.rigaOfferte.hidden;
+	}
 	
-	this.hide = () => {
-		this.tabellaOfferte.hidden = true;
-	};
+	this.toggleVisibilty = () => {
+		this.rigaOfferte.hidden = !this.rigaOfferte.hidden;
+	}
 }
 
-function ListaOggetti(Oggetto, tLista, tTabella, fCaricamento) {
+function ListaOggetti(Oggetto, divLista, fCaricamento) {
 	
-	this.tLista = tLista;
-	this.tTabella = tTabella;
+	this.divLista = divLista;
 	
 	this.carica = fCaricamento;
 	
 	this.update = function(prodotti) {
 		this.show();
-		this.tTabella.innerHTML = ""; // Svuota la tabella
+		this.divLista.innerHTML = ""; // Svuota la lista
 		
 		var self = this;
 		
 		prodotti.forEach((prodotto) => {
-			var p = new Oggetto(self.tTabella);
+			var p = new Oggetto(self.divLista);
 			p.update(prodotto);
 		});
 	};
 	
 	this.show = () => {
-		this.tTabella.hidden = false;
-		this.tLista.hidden = false;
+		this.divLista.hidden = false;
 	};
 	
 	this.hide = () => {
-		this.tTabella.hidden = true;
-		this.tLista.hidden = true;
+		this.divLista.hidden = true;
 	};
 }
 

@@ -35,7 +35,8 @@
 		this.aggiungiEventi = function(gestore) {
 			
 			bHome.addEventListener("click", (e) => {
-				// CODICE CLICK SU HOME
+				listaRisultati.carica(null);
+				listaOrdini.hide();
 			});
 			bCarrello.addEventListener("click", (e) => {
 				listaRisultati.hide();
@@ -45,10 +46,11 @@
 				listaOrdini.carica();
 				listaRisultati.hide();
 			});
-			tRicerca.addEventListener("keyup", (e) => {
-    			e.preventDefault();
-    			if (e.keyCode === ENTER_KEY_CODE)
-        			bRicerca.click();
+			tRicerca.addEventListener("keypress", (e) => {
+    			if (e.keyCode === ENTER_KEY_CODE) {
+					bRicerca.click();
+					e.preventDefault();
+				}
     		});
 			bRicerca.addEventListener("click", (e) => {
 				var form = e.target.closest("form");
@@ -86,22 +88,27 @@
 			menu.aggiungiEventi(this);
 			
 			listaRisultati = new ListaOggetti(	Prodotto,
-												document.getElementById("listaRisultati"),
-												document.getElementById("tabellaRisultati"), 
+												document.getElementById("listaRisultati"), 
 												function(keyword) {
-													caricaLista(this, "GET", 
-														"CercaKeyword?keyword=" + keyword, null)
+													if(keyword != null)
+														caricaLista(this, "GET", 
+															"CercaKeyword?keyword=" + keyword, null);
+													else
+														caricaLista(this, "POST", 
+															"CaricaVisualizzati", caricaVisualizzati(), 
+															true);
 												}
 			);
 			
 			listaOrdini = new ListaOggetti(		Ordine,
 												document.getElementById("listaOrdini"),
-												document.getElementById("tabellaOrdini"),
 												function() {
 													caricaLista(this, "GET", 
-														"VisualizzaOrdini", null)
+														"VisualizzaOrdini", null);
 												}
 			);
+			
+			listaRisultati.carica(null);
 		}
 		
 	}
