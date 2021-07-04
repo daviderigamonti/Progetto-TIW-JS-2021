@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import it.polimi.tiw.progetto.js.beans.Utente;
 import it.polimi.tiw.progetto.js.dao.UtenteDAO;
 import it.polimi.tiw.progetto.js.utils.GestoreConnessione;
@@ -64,8 +67,13 @@ public class ControllaLogin extends HttpServlet {
 			response.getWriter().println("Credenziali non valide");
 		} else {
 			request.getSession().setAttribute("utente", usr);
+			
+			Gson gson = new GsonBuilder().setDateFormat("yyyy MMM dd").create();
+			String json = gson.toJson(usr);
 			response.setStatus(HttpServletResponse.SC_OK);
-			response.getWriter().println(usr.getNome());
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write(json);
 		}
 	}
 	

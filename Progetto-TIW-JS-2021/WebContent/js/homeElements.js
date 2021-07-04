@@ -2,7 +2,7 @@
  * Home Elements
  */
 
-function Prodotto(listaProdotti) {
+function Prodotto(gestore, listaProdotti) {
 	
 	this.listaProdotti = listaProdotti;
 	this.offerte;
@@ -46,7 +46,7 @@ function Prodotto(listaProdotti) {
 		tabellaOfferte.className = "tabellaRisultati";
 		cellaOfferte.appendChild(tabellaOfferte);
 		
-		this.offerte = new InfoOfferte(riga3, tabellaOfferte);
+		this.offerte = new InfoOfferte(gestore, riga3, tabellaOfferte);
 		
 		//Sezione immagine
 		cellaImmagine = document.createElement("td");
@@ -87,7 +87,7 @@ function Prodotto(listaProdotti) {
 	};
 }
 
-function Ordine(listaOrdini) {
+function Ordine(gestore, listaOrdini) {
 	
 	this.listaOrdini = listaOrdini;
 	
@@ -137,7 +137,169 @@ function Ordine(listaOrdini) {
 	};
 }
 
-function InfoOfferte(rigaOfferte, tabellaOfferte) {
+function Carrello(gestore, listaCarrelli) {
+	
+	this.listaCarrelli = listaCarrelli;
+	
+	this.update = function(carrello) {
+		var tabellaCarrello, riga1, riga2, riga3, cellaTotale, cellaPrezzoSpedizione, cellaSpedizione, formSpedizione, 
+		testoCitta, testoVia, testoNumero, testoCAP, bottoneSpedizione, label ,linebreak;
+		
+		var utente = JSON.parse(sessionStorage.getItem(SESSIONE_UTENTE));
+		var indirizzo = utente.indirizzo;
+			
+		tabellaCarrello = document.createElement("table");
+		tabellaCarrello.className = "tabellaProdotti";
+		this.listaCarrelli.appendChild(tabellaCarrello);
+		
+		carrello.prodotti.forEach((prodotto) => {
+			
+			var riga, cellaImmagine, immagine, cellaNome, cellaQuantita, cellaPrezzo;
+		
+			riga = document.createElement("tr");
+			tabellaCarrello.appendChild(riga);
+			
+			cellaImmagine = document.createElement("td");
+			riga.appendChild(cellaImmagine);
+			
+			immagine = document.createElement("img");
+			immagine.src = "data:image/png;base64," + prodotto.immagine;
+			immagine.className = "immagineMedia";
+			cellaImmagine.appendChild(immagine);
+			
+			cellaNome = document.createElement("td");
+			cellaNome.textContent = prodotto.nome;
+			riga.appendChild(cellaNome);
+			
+			cellaQuantita = document.createElement("td");
+			cellaQuantita.textContent = "x" + prodotto.quantita;
+			riga.appendChild(cellaQuantita);
+			
+			cellaPrezzo = document.createElement("td");
+			cellaPrezzo.textContent = prodotto.prezzo.toFixed(2) + " \u20AC";
+			riga.appendChild(cellaPrezzo);
+			
+		});
+		
+		riga1 = document.createElement("tr");
+		riga1.colSpan = "4";
+		tabellaCarrello.appendChild(riga1);
+		
+		riga2 = document.createElement("tr");
+		riga2.colSpan = "4";
+		tabellaCarrello.appendChild(riga2);
+		
+		riga3 = document.createElement("tr");
+		riga3.colSpan = "4";
+		tabellaCarrello.appendChild(riga3);
+		
+		cellaTotale = document.createElement("td");
+		cellaTotale.textContent = carrello.totaleCosto.toFixed(2) + " \u20AC";
+		riga1.appendChild(cellaTotale);
+		
+		cellaPrezzoSpedizione = document.createElement("td");
+		cellaPrezzoSpedizione.textContent = carrello.costoSpedizione.toFixed(2) + " \u20AC";
+		riga2.appendChild(cellaPrezzoSpedizione);
+		
+		cellaSpedizione = document.createElement("td");
+		riga3.appendChild(cellaSpedizione);
+		
+		formSpedizione = document.createElement("form");
+		formSpedizione.action = "#";
+		formSpedizione.id = "formSpedizione";
+		cellaSpedizione.appendChild(formSpedizione);
+		
+		label = document.createElement("label");
+        label.innerHTML = "Città: ";
+		formSpedizione.appendChild(label);
+		
+		testoCitta = document.createElement("input");
+		testoCitta.name = "citta";
+		testoCitta.type = "text";
+		testoCitta.value = indirizzo.citta;
+		formSpedizione.appendChild(testoCitta);
+		
+		linebreak = document.createElement("br");
+		formSpedizione.appendChild(linebreak);
+		
+		label = document.createElement("label");
+        label.innerHTML = "Via: ";
+		formSpedizione.appendChild(label);
+		
+		testoVia = document.createElement("input");
+		testoVia.name = "via";
+		testoVia.type = "text";
+		testoVia.value = indirizzo.via;
+		formSpedizione.appendChild(testoVia);
+		
+		linebreak = document.createElement("br");
+		formSpedizione.appendChild(linebreak);
+		
+		label = document.createElement("label");
+        label.innerHTML = "Numero: ";
+		formSpedizione.appendChild(label);
+		
+		testoNumero = document.createElement("input");
+		testoNumero.name = "numero";
+		testoNumero.type = "number";
+		testoNumero.value = indirizzo.numero;
+		formSpedizione.appendChild(testoNumero);
+		
+		linebreak = document.createElement("br");
+		formSpedizione.appendChild(linebreak);
+		
+		label = document.createElement("label");
+        label.innerHTML = "CAP: ";
+		formSpedizione.appendChild(label);
+		
+		testoCAP = document.createElement("input");
+		testoCAP.name = "cap";
+		testoCAP.type = "number";
+		testoCAP.value = indirizzo.cap;
+		formSpedizione.appendChild(testoCAP);
+		
+		linebreak = document.createElement("br");
+		formSpedizione.appendChild(linebreak);
+		
+		var carrelloForm = document.createElement("input");
+		carrelloForm.hidden = true;
+		carrelloForm.name = "carrello";
+		carrelloForm.value = "";
+		formSpedizione.appendChild(carrelloForm);
+		
+		bottoneSpedizione = document.createElement("input");
+		bottoneSpedizione.type = "button";
+		bottoneSpedizione.value = "Ordina";
+		bottoneSpedizione.addEventListener("click", (e) => {
+			var form = e.target.closest("form");
+			if(form.checkValidity()) {
+				carrelloForm.value = ritornaCarrello(utente.id);
+				makeCall("POST", "AggiungiOrdine", new FormData(form), function(req) {
+					if (req.readyState == 4) {
+		            	if (req.status == 200) {
+							carrelloForm.value = "";
+		              		cancellaCarrello(utente.id, carrello.fornitore.ID);
+							gestore.visOrdini();
+						}
+						else if (req.status == 403) {
+							//TODO
+		              		window.location.href = req.getResponseHeader("Location");
+		              		window.sessionStorage.removeItem('username');
+						}
+						else 
+							self.alert.textContent = message;
+					}
+		        });
+			}
+			else
+				form.reportValidity();
+		}, false);
+		formSpedizione.appendChild(bottoneSpedizione);
+		
+	};
+}
+
+function InfoOfferte(gestore, rigaOfferte, tabellaOfferte) {
 	
 	this.rigaOfferte = rigaOfferte;
 	this.tabellaOfferte = tabellaOfferte;
@@ -169,7 +331,7 @@ function InfoOfferte(rigaOfferte, tabellaOfferte) {
 		offerte.forEach((offerta) => {
 		
 			var rigaOff = new Array();
-			var cellaFornitore, cellaCarrello, formCarrello, numberCarrello, bottoneCarrello;
+			var cellaFornitore, cellaCarrello, formCarrello, numeroCarrello, bottoneCarrello;
 			
 			rigaOff[0] = document.createElement("tr");
 			self.tabellaOfferte.appendChild(rigaOff[0]);
@@ -222,17 +384,31 @@ function InfoOfferte(rigaOfferte, tabellaOfferte) {
 			formCarrello.action = "#";
 			cellaCarrello.appendChild(formCarrello);
 			
-			numberCarrello = document.createElement("input");
-			numberCarrello.type = "number";
-			numberCarrello.min = "1";
-			numberCarrello.value = "1";
-			formCarrello.appendChild(numberCarrello);
+			numeroCarrello = document.createElement("input");
+			numeroCarrello.name = "quantita";
+			numeroCarrello.type = "number";
+			numeroCarrello.min = "1";
+			numeroCarrello.value = "1";
+			numeroCarrello.addEventListener("keypress", (e) => {
+				if (e.keyCode === ENTER_KEY_CODE)
+					e.preventDefault();
+			}, false);
+			formCarrello.appendChild(numeroCarrello);
 			
 			bottoneCarrello = document.createElement("input");
 			bottoneCarrello.type = "button";
 			bottoneCarrello.value = "Inserisci";
+			bottoneCarrello.addEventListener("click", (e) => {
+				var form = e.target.closest("form");
+				if(form.checkValidity()) {
+					aggiungiCookie(	JSON.parse(sessionStorage.getItem(SESSIONE_UTENTE)).id, 
+									offerta.fornitore.ID, offerta.ID, form.quantita.value);	//TODO: limitare max prodotti
+					gestore.visCarrello();
+				}
+				else
+					form.reportValidity();
+			}, false);
 			formCarrello.appendChild(bottoneCarrello);
-			//TODO funzione aggiunta al carrello
 		});
 	}
 	
@@ -244,31 +420,3 @@ function InfoOfferte(rigaOfferte, tabellaOfferte) {
 		this.rigaOfferte.hidden = !this.rigaOfferte.hidden;
 	}
 }
-
-function ListaOggetti(Oggetto, divLista, fCaricamento) {
-	
-	this.divLista = divLista;
-	
-	this.carica = fCaricamento;
-	
-	this.update = function(prodotti) {
-		this.show();
-		this.divLista.innerHTML = ""; // Svuota la lista
-		
-		var self = this;
-		
-		prodotti.forEach((prodotto) => {
-			var p = new Oggetto(self.divLista);
-			p.update(prodotto);
-		});
-	};
-	
-	this.show = () => {
-		this.divLista.hidden = false;
-	};
-	
-	this.hide = () => {
-		this.divLista.hidden = true;
-	};
-}
-

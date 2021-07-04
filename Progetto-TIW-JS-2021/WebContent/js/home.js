@@ -4,12 +4,13 @@
 
 (function() {	// Nasconde le variabli dallo scope globale
 	
-	var gestorePagina, menu, listaRisultati, listaOrdini;
+	var gestorePagina;
 	
 	
 	window.addEventListener("load", () => {
 		gestorePagina = new GestorePagina();
 		gestorePagina.init();
+		gestorePagina.visHome();
 	}, false);
 	
 	
@@ -34,17 +35,14 @@
 		
 		this.aggiungiEventi = function(gestore) {
 			
-			bHome.addEventListener("click", (e) => {
-				listaRisultati.carica(null);
-				listaOrdini.hide();
+			bHome.addEventListener("click", () => {
+				gestore.visHome();
 			});
-			bCarrello.addEventListener("click", (e) => {
-				listaRisultati.hide();
-				listaOrdini.hide();
+			bCarrello.addEventListener("click", () => {
+				gestore.visCarrello();
 			});
-			bOrdini.addEventListener("click", (e) => {
-				listaOrdini.carica();
-				listaRisultati.hide();
+			bOrdini.addEventListener("click", () => {
+				gestore.visOrdini();
 			});
 			tRicerca.addEventListener("keypress", (e) => {
     			if (e.keyCode === ENTER_KEY_CODE) {
@@ -55,52 +53,97 @@
 			bRicerca.addEventListener("click", (e) => {
 				var form = e.target.closest("form");
 				if(form.checkValidity()) {
-					listaRisultati.carica(new FormData(form).get("keyword"));
-					listaOrdini.hide();
+					gestore.visRisultati(form);
 				}
 				else
 					form.reportValidity();
 			})
-			bLogout.addEventListener("click", (e) => {
-				// CODICE CLICK SU LOGOUT
+			bLogout.addEventListener("click", () => {
+				// TODO: CODICE CLICK SU LOGOUT
 			})
 			
 		} 
 	}
 	
+	function ListaOggetti(gestore, Oggetto, divLista, fCaricamento) {
+		
+		this.divLista = divLista;
+		
+		this.carica = fCaricamento;
+		
+		this.update = function(prodotti) {
+			this.show();
+			this.divLista.innerHTML = ""; // Svuota la lista
+			
+			var self = this;
+			
+			prodotti.forEach((prodotto) => {
+				var p = new Oggetto(gestore, self.divLista);
+				p.update(prodotto);
+			});
+		};
+		
+		this.show = () => {
+			this.divLista.hidden = false;
+		};
+		
+		this.hide = () => {
+			this.divLista.hidden = true;
+		};
+	}
+	
 	function GestorePagina() {
+		
+		this.benvenuto = null;
+		this.menu = null;
+		this.listaRisultati = null;
+		this.listaCarrello = null;
+		this.listaOrdini = null;
 		
 		this.init = function() {
 			
-			benvenuto = new Benvenuto(	document.getElementById("nomeUtente"),
-										sessionStorage.getItem(SESSIONE_NOME_UTENTE)						
+			this.benvenuto = new Benvenuto(	document.getElementById("nomeUtente"),
+											JSON.parse(sessionStorage.getItem(SESSIONE_UTENTE)).nome					
 			);
-			benvenuto.show();
+			this.benvenuto.show();
 			
-			menu = new Menu(	document.getElementById("bottoneHome"),
+			this.menu = new Menu(	document.getElementById("bottoneHome"),
 								document.getElementById("bottoneCarrello"),
 								document.getElementById("bottoneOrdini"),
 								document.getElementById("testoRicerca"),
 								document.getElementById("bottoneRicerca"),
-								benvenuto,
+								this.benvenuto,
 								document.getElementById("bottoneLogout")
 			);
-			menu.aggiungiEventi(this);
+			this.menu.aggiungiEventi(this);
 			
-			listaRisultati = new ListaOggetti(	Prodotto,
-												document.getElementById("listaRisultati"), 
-												function(keyword) {
-													if(keyword != null)
-														caricaLista(this, "GET", 
-															"CercaKeyword?keyword=" + keyword, null);
-													else
-														caricaLista(this, "POST", 
-															"CaricaVisualizzati", caricaVisualizzati(), 
-															true);
-												}
+			this.listaRisultati = new ListaOggetti(	this,
+													Prodotto,
+													document.getElementById("listaRisultati"), 
+													function(keyword) {
+														if(keyword != null)
+															caricaLista(this, "GET", 
+																"CercaKeyword?keyword=" + keyword, null);
+														else
+															caricaLista(this, "POST", 
+																"CaricaVisualizzati", caricaVisualizzati(), 
+																true);
+													}
 			);
 			
-			listaOrdini = new ListaOggetti(		Ordine,
+			this.listaCarrello = new ListaOggetti(	this,
+													Carrello,
+													document.getElementById("listaCarrello"),
+													function() {
+														caricaLista(this, "POST", 
+															"CaricaCarrello", 
+															ritornaCarrello(JSON.parse(sessionStorage.getItem(SESSIONE_UTENTE)).id),
+															true);
+													}
+			);
+			
+			this.listaOrdini = new ListaOggetti(this,
+												Ordine,
 												document.getElementById("listaOrdini"),
 												function() {
 													caricaLista(this, "GET", 
@@ -108,9 +151,32 @@
 												}
 			);
 			
-			listaRisultati.carica(null);
+		}
+		
+		this.visHome = function() {
+			this.listaCarrello.hide();
+			this.listaOrdini.hide();
+			this.listaRisultati.carica(null);
+		}
+		
+		this.visCarrello = function() {
+			this.listaRisultati.hide();
+			this.listaOrdini.hide();
+			this.listaCarrello.carica(null);
+		}
+		
+		this.visOrdini = function() {
+			this.listaRisultati.hide();
+			this.listaCarrello.hide();
+			this.listaOrdini.carica();
+		}
+		
+		this.visRisultati = function(form) {
+			this.listaCarrello.hide();
+			this.listaOrdini.hide();
+			this.listaRisultati.carica(new FormData(form).get("keyword"));
 		}
 		
 	}
 	
-})();
+})()

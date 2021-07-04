@@ -11,7 +11,8 @@
 			makeCall("POST", "ControllaLogin", new FormData(form), function(req) {
 				if(req.readyState == XMLHttpRequest.DONE) {
 					if(req.status == HTTP_CODES.success) {
-						sessionStorage.setItem(SESSIONE_NOME_UTENTE, req.responseText);
+						var utente = JSON.parse(req.responseText);
+						sessionStorage.setItem(SESSIONE_UTENTE, JSON.stringify(utente));
 						window.location.href = "home.html";
 					}
 					else
