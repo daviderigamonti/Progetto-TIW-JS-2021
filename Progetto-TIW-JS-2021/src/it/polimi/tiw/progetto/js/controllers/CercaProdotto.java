@@ -4,27 +4,19 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import it.polimi.tiw.progetto.js.beans.Prodotto;
-import it.polimi.tiw.progetto.js.beans.Utente;
 import it.polimi.tiw.progetto.js.dao.ProdottoDAO;
-import it.polimi.tiw.progetto.js.utils.CalcoloCosti;
-import it.polimi.tiw.progetto.js.utils.CookieParser;
 import it.polimi.tiw.progetto.js.utils.GestoreConnessione;
 import it.polimi.tiw.progetto.js.utils.IdException;
 

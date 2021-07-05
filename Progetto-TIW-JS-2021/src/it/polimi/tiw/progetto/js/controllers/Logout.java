@@ -27,6 +27,7 @@ public class Logout extends HttpServlet {
 		}
 		String path = getServletContext().getContextPath() + "/login.html";
 		response.sendRedirect(path);
+		return;
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)

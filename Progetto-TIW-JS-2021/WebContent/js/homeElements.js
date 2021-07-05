@@ -137,15 +137,16 @@ function Ordine(gestore, listaOrdini) {
 	};
 }
 
-function Carrello(gestore, listaCarrelli) {
+function Carrello(gestore, listaCarrelli, display) {
 	
 	this.listaCarrelli = listaCarrelli;
+	this.display = display;
 	
 	this.update = function(carrello) {
 		var tabellaCarrello, riga1, riga2, riga3, cellaTotale, cellaPrezzoSpedizione, cellaSpedizione, formSpedizione, 
 		testoCitta, testoVia, testoNumero, testoCAP, bottoneSpedizione, label ,linebreak;
 		
-		var utente = JSON.parse(sessionStorage.getItem(SESSIONE_UTENTE));
+		var utente = infoUtente();
 		var indirizzo = utente.indirizzo;
 			
 		tabellaCarrello = document.createElement("table");
@@ -181,120 +182,113 @@ function Carrello(gestore, listaCarrelli) {
 			
 		});
 		
-		riga1 = document.createElement("tr");
-		riga1.colSpan = "4";
-		tabellaCarrello.appendChild(riga1);
-		
-		riga2 = document.createElement("tr");
-		riga2.colSpan = "4";
-		tabellaCarrello.appendChild(riga2);
-		
-		riga3 = document.createElement("tr");
-		riga3.colSpan = "4";
-		tabellaCarrello.appendChild(riga3);
-		
-		cellaTotale = document.createElement("td");
-		cellaTotale.textContent = carrello.totaleCosto.toFixed(2) + " \u20AC";
-		riga1.appendChild(cellaTotale);
-		
-		cellaPrezzoSpedizione = document.createElement("td");
-		cellaPrezzoSpedizione.textContent = carrello.costoSpedizione.toFixed(2) + " \u20AC";
-		riga2.appendChild(cellaPrezzoSpedizione);
-		
-		cellaSpedizione = document.createElement("td");
-		riga3.appendChild(cellaSpedizione);
-		
-		formSpedizione = document.createElement("form");
-		formSpedizione.action = "#";
-		formSpedizione.id = "formSpedizione";
-		cellaSpedizione.appendChild(formSpedizione);
-		
-		label = document.createElement("label");
-        label.innerHTML = "Città: ";
-		formSpedizione.appendChild(label);
-		
-		testoCitta = document.createElement("input");
-		testoCitta.name = "citta";
-		testoCitta.type = "text";
-		testoCitta.value = indirizzo.citta;
-		formSpedizione.appendChild(testoCitta);
-		
-		linebreak = document.createElement("br");
-		formSpedizione.appendChild(linebreak);
-		
-		label = document.createElement("label");
-        label.innerHTML = "Via: ";
-		formSpedizione.appendChild(label);
-		
-		testoVia = document.createElement("input");
-		testoVia.name = "via";
-		testoVia.type = "text";
-		testoVia.value = indirizzo.via;
-		formSpedizione.appendChild(testoVia);
-		
-		linebreak = document.createElement("br");
-		formSpedizione.appendChild(linebreak);
-		
-		label = document.createElement("label");
-        label.innerHTML = "Numero: ";
-		formSpedizione.appendChild(label);
-		
-		testoNumero = document.createElement("input");
-		testoNumero.name = "numero";
-		testoNumero.type = "number";
-		testoNumero.value = indirizzo.numero;
-		formSpedizione.appendChild(testoNumero);
-		
-		linebreak = document.createElement("br");
-		formSpedizione.appendChild(linebreak);
-		
-		label = document.createElement("label");
-        label.innerHTML = "CAP: ";
-		formSpedizione.appendChild(label);
-		
-		testoCAP = document.createElement("input");
-		testoCAP.name = "cap";
-		testoCAP.type = "number";
-		testoCAP.value = indirizzo.cap;
-		formSpedizione.appendChild(testoCAP);
-		
-		linebreak = document.createElement("br");
-		formSpedizione.appendChild(linebreak);
-		
-		var carrelloForm = document.createElement("input");
-		carrelloForm.hidden = true;
-		carrelloForm.name = "carrello";
-		carrelloForm.value = "";
-		formSpedizione.appendChild(carrelloForm);
-		
-		bottoneSpedizione = document.createElement("input");
-		bottoneSpedizione.type = "button";
-		bottoneSpedizione.value = "Ordina";
-		bottoneSpedizione.addEventListener("click", (e) => {
-			var form = e.target.closest("form");
-			if(form.checkValidity()) {
-				carrelloForm.value = ritornaCarrello(utente.id);
-				makeCall("POST", "AggiungiOrdine", new FormData(form), function(req) {
-					if (req.readyState == 4) {
-		            	if (req.status == 200) {
+		if(!display) {
+			riga1 = document.createElement("tr");
+			riga1.colSpan = "4";
+			tabellaCarrello.appendChild(riga1);
+			
+			riga2 = document.createElement("tr");
+			riga2.colSpan = "4";
+			tabellaCarrello.appendChild(riga2);
+			
+			riga3 = document.createElement("tr");
+			riga3.colSpan = "4";
+			tabellaCarrello.appendChild(riga3);
+			
+			cellaTotale = document.createElement("td");
+			cellaTotale.textContent = carrello.totaleCosto.toFixed(2) + " \u20AC";
+			riga1.appendChild(cellaTotale);
+			
+			cellaPrezzoSpedizione = document.createElement("td");
+			cellaPrezzoSpedizione.textContent = carrello.costoSpedizione.toFixed(2) + " \u20AC";
+			riga2.appendChild(cellaPrezzoSpedizione);
+			
+			cellaSpedizione = document.createElement("td");
+			riga3.appendChild(cellaSpedizione);
+			
+			formSpedizione = document.createElement("form");
+			formSpedizione.action = "#";
+			formSpedizione.id = "formSpedizione";
+			cellaSpedizione.appendChild(formSpedizione);
+			
+			label = document.createElement("label");
+	        label.innerHTML = "Città: ";
+			formSpedizione.appendChild(label);
+			
+			testoCitta = document.createElement("input");
+			testoCitta.name = "citta";
+			testoCitta.type = "text";
+			testoCitta.value = indirizzo.citta;
+			formSpedizione.appendChild(testoCitta);
+			
+			linebreak = document.createElement("br");
+			formSpedizione.appendChild(linebreak);
+			
+			label = document.createElement("label");
+	        label.innerHTML = "Via: ";
+			formSpedizione.appendChild(label);
+			
+			testoVia = document.createElement("input");
+			testoVia.name = "via";
+			testoVia.type = "text";
+			testoVia.value = indirizzo.via;
+			formSpedizione.appendChild(testoVia);
+			
+			linebreak = document.createElement("br");
+			formSpedizione.appendChild(linebreak);
+			
+			label = document.createElement("label");
+	        label.innerHTML = "Numero: ";
+			formSpedizione.appendChild(label);
+			
+			testoNumero = document.createElement("input");
+			testoNumero.name = "numero";
+			testoNumero.type = "number";
+			testoNumero.value = indirizzo.numero;
+			formSpedizione.appendChild(testoNumero);
+			
+			linebreak = document.createElement("br");
+			formSpedizione.appendChild(linebreak);
+			
+			label = document.createElement("label");
+	        label.innerHTML = "CAP: ";
+			formSpedizione.appendChild(label);
+			
+			testoCAP = document.createElement("input");
+			testoCAP.name = "cap";
+			testoCAP.type = "number";
+			testoCAP.value = indirizzo.cap;
+			formSpedizione.appendChild(testoCAP);
+			
+			linebreak = document.createElement("br");
+			formSpedizione.appendChild(linebreak);
+			
+			var carrelloForm = document.createElement("input");
+			carrelloForm.hidden = true;
+			carrelloForm.name = "carrello";
+			carrelloForm.value = "";
+			formSpedizione.appendChild(carrelloForm);
+			
+			bottoneSpedizione = document.createElement("input");
+			bottoneSpedizione.type = "button";
+			bottoneSpedizione.value = "Ordina";
+			bottoneSpedizione.addEventListener("click", (e) => {
+				var form = e.target.closest("form");
+				if(form.checkValidity()) {
+					carrelloForm.value = ritornaCarrello(utente.id);
+					makeCall("POST", "AggiungiOrdine", new FormData(form), gestore.messaggio, 
+						function() {
 							carrelloForm.value = "";
 		              		cancellaCarrello(utente.id, carrello.fornitore.ID);
 							gestore.visOrdini();
-						}
-						else if (req.status == 403) {
-							//TODO
-		              		window.location.href = req.getResponseHeader("Location");
-		              		window.sessionStorage.removeItem('username');
-						}
-						else 
-							self.alert.textContent = message;
-					}
-		        });
-			}
-			else
-				form.reportValidity();
-		}, false);
-		formSpedizione.appendChild(bottoneSpedizione);
+			        	}
+					);
+				}
+				else
+					form.reportValidity();
+			}, false);
+			formSpedizione.appendChild(bottoneSpedizione);
+		}
 		
 	};
 }
@@ -307,20 +301,10 @@ function InfoOfferte(gestore, rigaOfferte, tabellaOfferte) {
 	
 	this.caricaOfferte = function(idProdotto) {
 		var self = this;
-		makeCall("GET", "CercaProdotto?idProdotto=" + idProdotto, null, function(req) {
-			if (req.readyState == 4) {
-            	if (req.status == 200) {
-              		var offerte = JSON.parse(req.responseText);
-					self.update(offerte);
-				}
-				else if (req.status == 403) {
-					//TODO
-              		window.location.href = req.getResponseHeader("Location");
-              		window.sessionStorage.removeItem('username');
-				}
-				else 
-					self.alert.textContent = message;
-			}
+		makeCall("GET", "CercaProdotto?idProdotto=" + idProdotto, 
+				null, gestore.messaggio, function(req) {
+	  		var offerte = JSON.parse(req.responseText);
+			self.update(offerte);
         });
 	};
 		
@@ -331,7 +315,8 @@ function InfoOfferte(gestore, rigaOfferte, tabellaOfferte) {
 		offerte.forEach((offerta) => {
 		
 			var rigaOff = new Array();
-			var cellaFornitore, cellaCarrello, formCarrello, numeroCarrello, bottoneCarrello;
+			var cellaFornitore, cellaCarrello, divSoglia, divNCarrello, divOverlayCarrello,
+			divPrezzoCarrello, formCarrello, numeroCarrello, bottoneCarrello;
 			
 			rigaOff[0] = document.createElement("tr");
 			self.tabellaOfferte.appendChild(rigaOff[0]);
@@ -353,6 +338,7 @@ function InfoOfferte(gestore, rigaOfferte, tabellaOfferte) {
 				else {
 					rigaPolitica = document.createElement("tr");
 					self.tabellaOfferte.appendChild(rigaPolitica);
+					rigaOff[i] = rigaPolitica;
 				}
 				
 				cellaSpedizione = document.createElement("td");
@@ -371,14 +357,51 @@ function InfoOfferte(gestore, rigaOfferte, tabellaOfferte) {
 			
 			cellaCarrello = document.createElement("td");
 			cellaCarrello.rowSpan = offerta.fornitore.politica.length;
-			cellaCarrello.style = "white-space:pre";	//TODO: da fare in CSS 
-			cellaCarrello.textContent = "La soglia per la spedizione gratis \xE9 di " + 
-										offerta.fornitore.soglia + " \u20AC" + "\n\n" +
-										"Numero di prodotti gi\xE1 nel carrello: " + 
-										offerta.quantita + "\n\n" +
-										"Valore dei prodotti gi\xE1 nel carrello: " + 
-										offerta.valore + " \u20AC" + "\n\n";
 			rigaOff[0].appendChild(cellaCarrello);
+			
+			divSoglia = document.createElement("div");
+			divSoglia.textContent = 	"La soglia per la spedizione gratis \xE9 di " + 
+										offerta.fornitore.soglia + " \u20AC";
+			cellaCarrello.appendChild(divSoglia);
+			
+			divNCarrello = document.createElement("div");
+			divOverlayCarrello = document.createElement("div");
+			divNCarrello.classList.add('overlaySource');
+			divOverlayCarrello.classList.add('overlay');
+			divOverlayCarrello.hidden = true;
+			divNCarrello.textContent =	"Numero di prodotti gi\xE1 nel carrello: " + 
+										numeroProdottiDaFornitore(infoUtente().id, //TODO: variabile per id
+											offerta.fornitore.ID);
+			var listaOverlay = new ListaOggetti(this,
+												Carrello,
+												divOverlayCarrello,
+												function() {
+													caricaLista(this, "POST", "CaricaCarrello", 
+														ritornaCarrelloDaFornitore(infoUtente().id, //TODO: variabile per id
+														offerta.fornitore.ID), true);
+												},
+												true
+			);
+			divNCarrello.addEventListener("mouseenter", () => {
+				divOverlayCarrello.hidden = false;
+				listaOverlay.carica();
+			}, false);
+			divNCarrello.addEventListener("mouseleave", () => {
+				divOverlayCarrello.hidden = true;
+			}, false);
+			divOverlayCarrello.addEventListener("mouseleave", () => {
+				divOverlayCarrello.hidden = true;
+			}, false);
+
+			cellaCarrello.appendChild(divNCarrello);
+			divNCarrello.appendChild(divOverlayCarrello);
+			
+			
+			
+			divPrezzoCarrello = document.createElement("div");
+			divPrezzoCarrello.textContent =	"Valore dei prodotti gi\xE1 nel carrello: " + 
+												offerta.valore + " \u20AC";
+			cellaCarrello.appendChild(divPrezzoCarrello);
 			
 			formCarrello = document.createElement("form");
 			formCarrello.action = "#";
@@ -390,7 +413,7 @@ function InfoOfferte(gestore, rigaOfferte, tabellaOfferte) {
 			numeroCarrello.min = "1";
 			numeroCarrello.value = "1";
 			numeroCarrello.addEventListener("keypress", (e) => {
-				if (e.keyCode === ENTER_KEY_CODE)
+				if (e.code === ENTER_KEY_CODE)
 					e.preventDefault();
 			}, false);
 			formCarrello.appendChild(numeroCarrello);
@@ -401,8 +424,8 @@ function InfoOfferte(gestore, rigaOfferte, tabellaOfferte) {
 			bottoneCarrello.addEventListener("click", (e) => {
 				var form = e.target.closest("form");
 				if(form.checkValidity()) {
-					aggiungiCookie(	JSON.parse(sessionStorage.getItem(SESSIONE_UTENTE)).id, 
-									offerta.fornitore.ID, offerta.ID, form.quantita.value);	//TODO: limitare max prodotti
+					aggiungiCookie(	infoUtente().id, offerta.fornitore.ID, 
+									offerta.ID, form.quantita.value);	//TODO: limitare max prodotti
 					gestore.visCarrello();
 				}
 				else
@@ -419,4 +442,31 @@ function InfoOfferte(gestore, rigaOfferte, tabellaOfferte) {
 	this.toggleVisibilty = () => {
 		this.rigaOfferte.hidden = !this.rigaOfferte.hidden;
 	}
+}
+
+function ListaOggetti(gestore, Oggetto, divLista, fCaricamento, optOggetto) {
+		
+	this.divLista = divLista;
+	
+	this.carica = fCaricamento;
+	
+	this.update = function(prodotti) {
+		this.show();
+		this.divLista.innerHTML = ""; // Svuota la lista
+		
+		var self = this;
+		
+		prodotti.forEach((prodotto) => {
+			var p = new Oggetto(gestore, self.divLista, optOggetto);
+			p.update(prodotto);
+		});
+	};
+	
+	this.show = () => {
+		this.divLista.hidden = false;
+	};
+	
+	this.hide = () => {
+		this.divLista.hidden = true;
+	};
 }

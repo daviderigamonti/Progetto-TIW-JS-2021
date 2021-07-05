@@ -5,10 +5,11 @@
 const HTTP_CODES = {
 	success			: 200,
 	badRequest		: 400,
-	unauthorized	: 401
+	unauthorized	: 401,
+	forbidden		: 403
 }
 
-const ENTER_KEY_CODE = 13;
+const ENTER_KEY_CODE = "Enter";
 
 const SESSIONE_UTENTE = "utente";
 
@@ -16,12 +17,27 @@ const COOKIE_VALORI_SEP = "-";
 const COOKIE_PRODOTTI_SEP = "_";
 const COOKIE_DELETE = "=; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 
-function makeCall(httpMethod, url, data, callBack, json) {
+const DEFAULT_PAGE = "login.html";
+
+
+function makeCall(httpMethod, url, data, responseTag, callBack, json) {
 	var req = new XMLHttpRequest();
+	
 	req.onreadystatechange = function() {
-		callBack(req);
+		if(req.readyState == XMLHttpRequest.DONE) {
+			if(req.status == HTTP_CODES.success) 
+				callBack(req);
+			else if (req.status == HTTP_CODES.unauthorized || req.status == HTTP_CODES.forbidden) {
+				window.sessionStorage.removeItem(SESSIONE_UTENTE);
+          		window.location.href = DEFAULT_PAGE;
+			}
+			else
+				responseTag.textContent = req.responseText;
+		}
 	};
+	
 	req.open(httpMethod, url);
+	
 	if(json)
 		req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 
@@ -31,23 +47,16 @@ function makeCall(httpMethod, url, data, callBack, json) {
 		req.send(data);
 }
 
-function caricaLista(self, httpMethod, url, data, json) {
-	makeCall(httpMethod, url, data, function(req) {
-		if (req.readyState == XMLHttpRequest.DONE) {
-			if (req.status == HTTP_CODES.success) {
-  				var elementi = JSON.parse(req.responseText);
-  				if (elementi.length == 0)
-    				return;
-				self.update(elementi);
-			}
-			else if (req.status == 403) {
-				//TODO
-          		window.location.href = req.getResponseHeader("Location");
-          		window.sessionStorage.removeItem('username');
-			}
-			else 
-				self.alert.textContent = message;
-		}
+function infoUtente() {
+	return JSON.parse(window.sessionStorage.getItem(SESSIONE_UTENTE));
+}
+
+function caricaLista(self, httpMethod, url, data, responseTag, json) {
+	makeCall(httpMethod, url, data, responseTag, function(req) {
+		var elementi = JSON.parse(req.responseText);
+		if (elementi.length == 0)
+			return;
+		self.update(elementi);
 	}, json);
 }
 
@@ -178,6 +187,29 @@ function ritornaCarrello(idUtente) {
 		}
   	}
  	return JSON.stringify(carrello);
+}
+
+function ritornaCarrelloDaFornitore(idUtente, idFornitore) {
+	var carrello = new Array();
+	var prodotti = getCookie(idUtente, idFornitore);
+	if(prodotti)
+		carrello.push({
+			"fornitore": {
+				"ID": idFornitore
+			},
+			"prodotti": prodotti
+		});
+ 	return JSON.stringify(carrello);
+}
+
+function numeroProdottiDaFornitore(idUtente, idFornitore) {
+	var prodotti = getCookie(idUtente, idFornitore);
+	var n = 0;
+	if(prodotti)
+		prodotti.forEach((prodotto) => {
+			n += Number(prodotto.quantita);
+		});
+	return n;
 }
 
 function cancellaCarrello(idUtente, idFornitore) {

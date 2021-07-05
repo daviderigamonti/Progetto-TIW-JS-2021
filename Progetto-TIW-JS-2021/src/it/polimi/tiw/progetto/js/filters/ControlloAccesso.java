@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-public class ControlloAccesso implements Filter{
+public class ControlloAccesso implements Filter {
 	
 	public ControlloAccesso() {
 	}
@@ -23,16 +23,17 @@ public class ControlloAccesso implements Filter{
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 
-		System.out.print("Login checker filter executing ...\n"); 
+		System.out.print("Controllo accesso\n"); 
 
-		// java.lang.String loginpath = "/index.html";
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
 		String loginpath = req.getServletContext().getContextPath() + "/login.html";
 
 		HttpSession s = req.getSession();
 		if (s.isNew() || s.getAttribute("utente") == null) {
-			res.sendRedirect(loginpath);
+			System.out.print("Accesso proibito\n"); 
+			res.setStatus(403);
+			res.setHeader("Location", loginpath);
 			return;
 		}
 		// pass the request along the filter chain

@@ -6,14 +6,16 @@
 	
 	var gestorePagina;
 	
-	
 	window.addEventListener("load", () => {
-		gestorePagina = new GestorePagina();
-		gestorePagina.init();
-		gestorePagina.visHome();
+		if (infoUtente() != null) {
+			gestorePagina = new GestorePagina();
+			gestorePagina.init();
+			gestorePagina.visHome();
+		}
+		else 
+			window.location.href = "login.html";
 	}, false);
-	
-	
+		
 	function Benvenuto(lBenvenuto, nomeUtente) {
 		
 		this.nomeUtente = nomeUtente;
@@ -45,7 +47,7 @@
 				gestore.visOrdini();
 			});
 			tRicerca.addEventListener("keypress", (e) => {
-    			if (e.keyCode === ENTER_KEY_CODE) {
+    			if (e.code === ENTER_KEY_CODE) {
 					bRicerca.click();
 					e.preventDefault();
 				}
@@ -59,41 +61,17 @@
 					form.reportValidity();
 			})
 			bLogout.addEventListener("click", () => {
-				// TODO: CODICE CLICK SU LOGOUT
+				makeCall("GET", "Logout", null, gestore.messaggio, () => {
+					window.sessionStorage.removeItem(SESSIONE_UTENTE);
+					window.location.href = "login.html";
+				});
 			})
-			
 		} 
-	}
-	
-	function ListaOggetti(gestore, Oggetto, divLista, fCaricamento) {
-		
-		this.divLista = divLista;
-		
-		this.carica = fCaricamento;
-		
-		this.update = function(prodotti) {
-			this.show();
-			this.divLista.innerHTML = ""; // Svuota la lista
-			
-			var self = this;
-			
-			prodotti.forEach((prodotto) => {
-				var p = new Oggetto(gestore, self.divLista);
-				p.update(prodotto);
-			});
-		};
-		
-		this.show = () => {
-			this.divLista.hidden = false;
-		};
-		
-		this.hide = () => {
-			this.divLista.hidden = true;
-		};
 	}
 	
 	function GestorePagina() {
 		
+		this.messaggio = null;
 		this.benvenuto = null;
 		this.menu = null;
 		this.listaRisultati = null;
@@ -102,53 +80,54 @@
 		
 		this.init = function() {
 			
+			// Messaggio per errori/notifiche
+			this.messaggio = document.getElementById("messaggio");
+			
+			// Messaggio di benvenuto
 			this.benvenuto = new Benvenuto(	document.getElementById("nomeUtente"),
-											JSON.parse(sessionStorage.getItem(SESSIONE_UTENTE)).nome					
+											infoUtente().nome					
 			);
 			this.benvenuto.show();
 			
-			this.menu = new Menu(	document.getElementById("bottoneHome"),
-								document.getElementById("bottoneCarrello"),
-								document.getElementById("bottoneOrdini"),
-								document.getElementById("testoRicerca"),
-								document.getElementById("bottoneRicerca"),
-								this.benvenuto,
-								document.getElementById("bottoneLogout")
+			// Menu comprensivo di bottoni per la navigazione e messaggio di benvenuto
+			this.menu = new Menu(document.getElementById("bottoneHome"),
+				document.getElementById("bottoneCarrello"), 
+				document.getElementById("bottoneOrdini"), 
+				document.getElementById("testoRicerca"),
+				document.getElementById("bottoneRicerca"),
+				this.benvenuto,
+				document.getElementById("bottoneLogout")
 			);
 			this.menu.aggiungiEventi(this);
 			
-			this.listaRisultati = new ListaOggetti(	this,
-													Prodotto,
-													document.getElementById("listaRisultati"), 
-													function(keyword) {
-														if(keyword != null)
-															caricaLista(this, "GET", 
-																"CercaKeyword?keyword=" + keyword, null);
-														else
-															caricaLista(this, "POST", 
-																"CaricaVisualizzati", caricaVisualizzati(), 
-																true);
-													}
+			// Lista utilizzata per visualizzare prodotti
+			this.listaRisultati = new ListaOggetti(this, Prodotto, 
+				document.getElementById("listaRisultati"), 
+				function(keyword) {
+					if(keyword != null)
+						caricaLista(this, "GET", "CercaKeyword?keyword=" + keyword, 
+							null, this.messaggio);
+					else
+						caricaLista(this, "POST", "CaricaVisualizzati", 
+							caricaVisualizzati(), messaggio, true);
+				}
 			);
 			
-			this.listaCarrello = new ListaOggetti(	this,
-													Carrello,
-													document.getElementById("listaCarrello"),
-													function() {
-														caricaLista(this, "POST", 
-															"CaricaCarrello", 
-															ritornaCarrello(JSON.parse(sessionStorage.getItem(SESSIONE_UTENTE)).id),
-															true);
-													}
+			// Lista utilizzata per visualizzare il carrello dell'utente
+			this.listaCarrello = new ListaOggetti(this, Carrello,
+				document.getElementById("listaCarrello"),
+				function() {
+					caricaLista(this, "POST", "CaricaCarrello", 
+						ritornaCarrello(infoUtente().id), messaggio, true);
+				}
 			);
 			
-			this.listaOrdini = new ListaOggetti(this,
-												Ordine,
-												document.getElementById("listaOrdini"),
-												function() {
-													caricaLista(this, "GET", 
-														"VisualizzaOrdini", null);
-												}
+			// Lista utilizzata per visualizzare gli ordini dell'utente
+			this.listaOrdini = new ListaOggetti(this, Ordine,
+				document.getElementById("listaOrdini"),
+				function() {
+					caricaLista(this, "GET", "VisualizzaOrdini", messaggio);
+				}
 			);
 			
 		}
@@ -162,7 +141,7 @@
 		this.visCarrello = function() {
 			this.listaRisultati.hide();
 			this.listaOrdini.hide();
-			this.listaCarrello.carica(null);
+			this.listaCarrello.carica();
 		}
 		
 		this.visOrdini = function() {
@@ -178,5 +157,4 @@
 		}
 		
 	}
-	
-})()
+})();

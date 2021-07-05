@@ -70,10 +70,11 @@ public class ControllaLogin extends HttpServlet {
 			
 			Gson gson = new GsonBuilder().setDateFormat("yyyy MMM dd").create();
 			String json = gson.toJson(usr);
-			response.setStatus(HttpServletResponse.SC_OK);
+			
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
 			response.getWriter().write(json);
+			response.setStatus(HttpServletResponse.SC_OK);
 		}
 	}
 	

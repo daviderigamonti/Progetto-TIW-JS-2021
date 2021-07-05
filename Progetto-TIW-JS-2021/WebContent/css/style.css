@@ -75,6 +75,26 @@ table.tabellaProdotti, table.tabellaRisultati, div.divCentrato  a:link, a:visite
       text-decoration: none;
       color: black;
 }
+
+.overlaySource {
+    position: relative;
+}
+
+.overlay {
+    position: absolute;
+    top: 100%;
+    left: 0px;
+    background: #faf287;
+    opacity: 0;
+    height: 0;
+    
+}
+
+.overlaySource:hover .overlay {
+    height: auto;
+    opacity: 0.85;
+    z-index: 1;
+}
 /*
 td, tr, table{
 	border: 2px solid black;
