@@ -1,5 +1,5 @@
 /**
- * Home
+ * Home: Script relativo alla pagina home per Progetto-TIW-JS-2021
  */
 
 (function() {	// Nasconde le variabli dallo scope globale
@@ -8,14 +8,21 @@
 	
 	window.addEventListener("load", () => {
 		if (infoUtente() != null) {
+			// Creo un nuovo gestore della pagina e lo inizializzo
 			gestorePagina = new GestorePagina();
 			gestorePagina.init();
+			// Visualizzo la pagina principale
 			gestorePagina.visHome();
 		}
 		else 
-			window.location.href = "login.html";
+			window.location.href = DEFAULT_PAGE;
 	}, false);
-		
+	
+	/**
+	 * Messaggio di benvenuto della pagina contenente il nome dell'utente
+	 * @param {Node} lBenvenuto Nodo contenente il messaggio di benvenuto
+	 * @param {String} nomeUtente Nome dell'utente da visualizzare
+	 */
 	function Benvenuto(lBenvenuto, nomeUtente) {
 		
 		this.nomeUtente = nomeUtente;
@@ -25,14 +32,22 @@
 		}
 	}
 	
-	function Menu(bHome, bCarrello, bOrdini, tRicerca, bRicerca, benvenuto, bLogout) {
+	/**
+	 * Menu interattivo per la navigazione all'interno della pagina
+	 * @param {Node} bHome Nodo contenente il bottone HOME
+	 * @param {Node} bCarrello Nodo contenente il bottone CARRELLO
+	 * @param {Node} bOrdini Nodo contenente il bottone ORDINI
+	 * @param {Node} tRicerca Nodo contenente la textbox di ricerca
+	 * @param {Node} bRicerca Nodo contenente il bottone RICERCA
+	 * @param {Node} bLogout Nodo contenente il bottone LOGOUT
+	 */
+	function Menu(bHome, bCarrello, bOrdini, tRicerca, bRicerca, bLogout) {
 		
 		this.bHome = bHome;
 		this.bCarrello = bCarrello;
 		this.bOrdini = bOrdini;
 		this.tRicerca = tRicerca;
 		this.bRicerca = bRicerca;
-		this.benvenuto = benvenuto;
 		this.bLogout = bLogout;
 		
 		this.aggiungiEventi = function(gestore) {
@@ -47,6 +62,8 @@
 				gestore.visOrdini();
 			});
 			tRicerca.addEventListener("keypress", (e) => {
+				// In caso l'utente prema il pulsante INVIO all'interno del campo di ricerca
+				// l'evento viene reindirizzato al gestore del pulsante
     			if (e.code === ENTER_KEY_CODE) {
 					bRicerca.click();
 					e.preventDefault();
@@ -55,6 +72,7 @@
 			bRicerca.addEventListener("click", (e) => {
 				var form = e.target.closest("form");
 				if(form.checkValidity()) {
+					// Se il form è valido si effettua la ricerca
 					gestore.visRisultati(form);
 				}
 				else
@@ -62,13 +80,18 @@
 			})
 			bLogout.addEventListener("click", () => {
 				makeCall("GET", "Logout", null, gestore.messaggio, () => {
+					// Routine di logout
 					window.sessionStorage.removeItem(SESSIONE_UTENTE);
-					window.location.href = "login.html";
+					window.location.href = DEFAULT_PAGE;
 				});
 			})
 		} 
 	}
 	
+	/**
+	 * Gestore della pagina che regola l'inizializzazione dei componenti 
+	 * e la visualizzazione degli elementi
+	 */
 	function GestorePagina() {
 		
 		this.messaggio = null;
@@ -89,13 +112,12 @@
 			);
 			this.benvenuto.show();
 			
-			// Menu comprensivo di bottoni per la navigazione e messaggio di benvenuto
+			// Menu comprensivo di bottoni per la navigazione 
 			this.menu = new Menu(document.getElementById("bottoneHome"),
 				document.getElementById("bottoneCarrello"), 
 				document.getElementById("bottoneOrdini"), 
 				document.getElementById("testoRicerca"),
 				document.getElementById("bottoneRicerca"),
-				this.benvenuto,
 				document.getElementById("bottoneLogout")
 			);
 			this.menu.aggiungiEventi(this);
@@ -104,10 +126,10 @@
 			this.listaRisultati = new ListaOggetti(this, Prodotto, 
 				document.getElementById("listaRisultati"), 
 				function(keyword) {
-					if(keyword != null)
+					if(keyword != null)		// Ricerca per keyword
 						caricaLista(this, "GET", "CercaKeyword?keyword=" + keyword, 
 							null, this.messaggio);
-					else
+					else					// Visualizzazione dei prodotti recenti
 						caricaLista(this, "POST", "CaricaVisualizzati", 
 							caricaVisualizzati(), messaggio, true);
 				}
@@ -118,7 +140,7 @@
 				document.getElementById("listaCarrello"),
 				function() {
 					caricaLista(this, "POST", "CaricaCarrello", 
-						ritornaCarrello(infoUtente().id), messaggio, true);
+						ritornaCookieCarrello(infoUtente().id), messaggio, true);
 				}
 			);
 			

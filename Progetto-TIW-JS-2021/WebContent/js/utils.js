@@ -1,5 +1,5 @@
 /**
- * Utils
+ * Utils: Funzioni di utilità generale utilizzate per Progetto-TIW-JS-2021
  */
 
 const HTTP_CODES = {
@@ -20,7 +20,19 @@ const COOKIE_DELETE = "=; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 const DEFAULT_PAGE = "login.html";
 
 
+/**
+ * Makes a call to the server, utilizing the XMLHttpRequest object
+ * @param {String} httpMethod Metodo HTTP da utilizzare per la chiamata
+ * @param {String} url Url da utilizzare per la chiamata
+ * @param {Object} data Eventuali dati aggiuntivi da inserire nella chiamata
+ * @param {Node} responseTag Nodo da utilizzare per visualizzare il messaggio di risposta
+ * @param {Function} callBack Funzione da chiamare una volta ottenuta una risposta
+ * 							  positiva dal server
+ * @param {Boolean} json Flag utilizzato per indicare se i dati aggiuntivi specificati nel
+ * 						 parametro "data" siano di tipo JSON
+ */
 function makeCall(httpMethod, url, data, responseTag, callBack, json) {
+	
 	var req = new XMLHttpRequest();
 	
 	req.onreadystatechange = function() {
@@ -28,6 +40,8 @@ function makeCall(httpMethod, url, data, responseTag, callBack, json) {
 			if(req.status == HTTP_CODES.success) 
 				callBack(req);
 			else if (req.status == HTTP_CODES.unauthorized || req.status == HTTP_CODES.forbidden) {
+				// Nel caso l'utente non abbia effettuato l'accesso o non possieda i privilegi
+				// per visualizzare una determinata risorsa, viene rispedito alla pagina di default
 				window.sessionStorage.removeItem(SESSIONE_UTENTE);
           		window.location.href = DEFAULT_PAGE;
 			}
@@ -38,6 +52,7 @@ function makeCall(httpMethod, url, data, responseTag, callBack, json) {
 	
 	req.open(httpMethod, url);
 	
+	// Se i dati sono di tipo JSON viene specificato il Content-Type all'interno della richiesta
 	if(json)
 		req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 
@@ -47,10 +62,16 @@ function makeCall(httpMethod, url, data, responseTag, callBack, json) {
 		req.send(data);
 }
 
-function infoUtente() {
-	return JSON.parse(window.sessionStorage.getItem(SESSIONE_UTENTE));
-}
-
+/**
+ * Funzione utilizzata per caricare una lista di elementi
+ * @param {ListaOggetti} self Riferimento alla lista di oggetti
+ * @param {String} httpMethod Metodo HTTP da utilizzare per la chiamata
+ * @param {String} url Url da utilizzare per la chiamata
+ * @param {Object} data Eventuali dati aggiuntivi da inserire nella chiamata
+ * @param {Node} responseTag Nodo da utilizzare per visualizzare il messaggio di risposta
+ * @param {Boolean} json Flag utilizzato per indicare se i dati aggiuntivi specificati nel
+ * 						 parametro "data" siano di tipo JSON
+ */
 function caricaLista(self, httpMethod, url, data, responseTag, json) {
 	makeCall(httpMethod, url, data, responseTag, function(req) {
 		var elementi = JSON.parse(req.responseText);
@@ -60,6 +81,18 @@ function caricaLista(self, httpMethod, url, data, responseTag, json) {
 	}, json);
 }
 
+/**
+ * Recupera le informazioni dell'utente dalla sessione
+ */
+function infoUtente() {
+	return JSON.parse(window.sessionStorage.getItem(SESSIONE_UTENTE));
+}
+
+/**
+ * Aggiunge il riferimento alla visualizzazione di un determinato prodotto da parte 
+ * dell'utente all'interno della sessione
+ * @param {Number} id Id del prodotto visualizzato dall'utente
+ */
 function aggiungiVisualizzato(id) {
 	var listaVisualizzati = window.sessionStorage.getItem("listaVisualizzati");
 	// Se nella sessione non è presente la lista viene creato e aggiunto un array vuoto
@@ -81,10 +114,12 @@ function aggiungiVisualizzato(id) {
 			listaVisualizzati.shift();
 		listaVisualizzati.push(id);
 	}
-	window.sessionStorage.setItem(	"listaVisualizzati", 
-									JSON.stringify(listaVisualizzati));
+	window.sessionStorage.setItem("listaVisualizzati", JSON.stringify(listaVisualizzati));
 }
 
+/**
+ * Carica tutti i prodotti visualizzati presenti all'interno della sessione corrente
+ */
 function caricaVisualizzati() {
 	var listaVisualizzati = window.sessionStorage.getItem("listaVisualizzati");
 	// Se nella sessione non è presente la lista viene creato e aggiunto un array vuoto
@@ -97,12 +132,19 @@ function caricaVisualizzati() {
 	return listaVisualizzati;
 }
 
-function aggiungiCookie(idUtente, idFornitore, idProdotto, quantita) {
+/**
+ * Aggiunge un prodotto all'interno del carrello tramite cookie
+ * @param {Number} idUtente Codice identificativo dell'utente
+ * @param {Number} idFornitore Codice identificativo del fornitore
+ * @param {Number} idProdotto Codice identificativo del prodotto
+ * @param {Number} quantita Quantità dei prodotti selezionati
+ */
+function aggiungiCookieProdotto(idUtente, idFornitore, idProdotto, quantita) {
     var tempo = 60 * 60 * 1000;
 	var data = new Date();
 	data = new Date(data.getTime() + tempo);
 	
-	var prodotti = getCookie(idUtente, idFornitore);
+	var prodotti = ritornaCookieProdotti(idUtente, idFornitore);
 	var aggiunto = false;
 	
 	// Aggiungo id utente e fornitore
@@ -134,7 +176,12 @@ function aggiungiCookie(idUtente, idFornitore, idProdotto, quantita) {
     document.cookie = cookie;
 }
 
-function getCookie(idUtente, idFornitore) {
+/**
+ * Ritorna tutti i prodotti relativi ad un fornitore tramite cookie
+ * @param {Number} idUtente Codice identificativo dell'utente
+ * @param {Number} idFornitore Codice identificativo del fornitore
+ */
+function ritornaCookieProdotti(idUtente, idFornitore) {
 	var nome = idUtente + COOKIE_VALORI_SEP + idFornitore + "=";
   	var decodedCookie = decodeURIComponent(document.cookie);
 	var ca = decodedCookie.split(';');
@@ -163,7 +210,11 @@ function getCookie(idUtente, idFornitore) {
  	return null;
 }
 
-function ritornaCarrello(idUtente) {
+/**
+ * Ritorna tutti i prodotti presenti nel carrello con i relativi fornitori tramite cookie
+ * @param {Number} idUtente Codice identificativo dell'utente
+ */
+function ritornaCookieCarrello(idUtente) {
 	var nome = idUtente + COOKIE_VALORI_SEP;
   	var decodedCookie = decodeURIComponent(document.cookie);
 	var ca = decodedCookie.split(';');
@@ -175,7 +226,7 @@ function ritornaCarrello(idUtente) {
      		 c = c.substring(1);
     	if (c.indexOf(nome) == 0) {
 			var idFornitore = Number(c.split(COOKIE_VALORI_SEP)[1].split("=")[0]);
-			var prodotti = getCookie(idUtente, idFornitore);
+			var prodotti = ritornaCookieProdotti(idUtente, idFornitore);
 			// Formato del carrello da aggiungere alla lista
 			if(prodotti)
 				carrello.push({
@@ -189,9 +240,14 @@ function ritornaCarrello(idUtente) {
  	return JSON.stringify(carrello);
 }
 
-function ritornaCarrelloDaFornitore(idUtente, idFornitore) {
+/**
+ * Ritorna tutti i prodotti presenti nel carrello, relativi ad un fornitore, tramite cookie
+ * @param {Number} idUtente Codice identificativo dell'utente
+ * @param {Number} idFornitore Codice identificativo del fornitore
+ */
+function ritornaCookieCarrelloDaFornitore(idUtente, idFornitore) {
 	var carrello = new Array();
-	var prodotti = getCookie(idUtente, idFornitore);
+	var prodotti = ritornaCookieProdotti(idUtente, idFornitore);
 	if(prodotti)
 		carrello.push({
 			"fornitore": {
@@ -202,8 +258,13 @@ function ritornaCarrelloDaFornitore(idUtente, idFornitore) {
  	return JSON.stringify(carrello);
 }
 
-function numeroProdottiDaFornitore(idUtente, idFornitore) {
-	var prodotti = getCookie(idUtente, idFornitore);
+/**
+ * Ritorna il numero dei prodotti presenti nel carrello, relativi ad un fornitore, tramite cookie
+ * @param {Number} idUtente Codice identificativo dell'utente
+ * @param {Number} idFornitore Codice identificativo del fornitore
+ */
+function numeroCookieProdottiDaFornitore(idUtente, idFornitore) {
+	var prodotti = ritornaCookieProdotti(idUtente, idFornitore);
 	var n = 0;
 	if(prodotti)
 		prodotti.forEach((prodotto) => {
@@ -212,10 +273,19 @@ function numeroProdottiDaFornitore(idUtente, idFornitore) {
 	return n;
 }
 
-function cancellaCarrello(idUtente, idFornitore) {
+/**
+ * Cancella tutti i prodotti presenti nel carrello, relativi ad un fornitore, tramite cookie
+ * @param {Number} idUtente Codice identificativo dell'utente
+ * @param {Number} idFornitore Codice identificativo del fornitore
+ */
+function cancellaCookieCarrello(idUtente, idFornitore) {
 	 document.cookie = idUtente + COOKIE_VALORI_SEP + idFornitore + COOKIE_DELETE;
 }
 
+/**
+ * Restituisce la stringa completa contenente le varie informazioni relative ad un indirizzo
+ * @param {Object} indirizzo Indirizzo da trascrivere
+ */
 function indirizzo(indirizzo) {
 	return 	"Via " + indirizzo.via + " " + 
 			indirizzo.numero + ", " + 

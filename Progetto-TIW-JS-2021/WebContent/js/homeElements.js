@@ -1,11 +1,17 @@
 /**
- * Home Elements
+ * Home Elements: Elementi ausiliari utilizzati dalla pagina di home per Progetto-TIW-JS-2021
  */
 
+/** 
+ * Prodotto visualizzato in caso di ricerca, espandibile tramite 
+ * una tabella delle offerte
+ * @param {GestorePagina} gestore Gestore della pagina che contiene il prodotto
+ * @param {Node} listaProdotti Nodo che contiene la lista dei prodotti
+ */
 function Prodotto(gestore, listaProdotti) {
 	
 	this.listaProdotti = listaProdotti;
-	this.offerte;
+	this.listaOfferte;
 	
 	this.update = function(prodotto) {
 		
@@ -13,15 +19,19 @@ function Prodotto(gestore, listaProdotti) {
 		
 		var tabellaProdotto, riga1, riga2, riga3, cellaImmagine, immagine, 
 			cellaCategoria, cellaNome, cellaPrezzo, cellaDescrizione, 
-			cellaOfferte, tabellaOfferte; 
-			
+			cellaOfferte, divOfferte; 
+		
+		// Funzione utilizzata per caricare le offerte del prodotto
 		var caricaOfferte = (e) => {
-			if(self.offerte.isHidden()) {
+			if(self.listaOfferte.isHidden()) {
 				var idSelezionato = e.target.getAttribute("idProdotto");
+				// Notifica che il prodotto è stato visualizzato dall'utente
 				aggiungiVisualizzato(idSelezionato);
-	      		self.offerte.caricaOfferte(idSelezionato, self.tTabella);
+				self.listaOfferte.carica();
+				self.listaOfferte.show();
 			}
-			self.offerte.toggleVisibilty();
+			else
+				self.listaOfferte.hide();
 		}
 		
 		tabellaProdotto = document.createElement("table");
@@ -42,11 +52,16 @@ function Prodotto(gestore, listaProdotti) {
 		cellaOfferte.colSpan = "4";
 		riga3.appendChild(cellaOfferte);
 		
-		tabellaOfferte = document.createElement("table");
-		tabellaOfferte.className = "tabellaRisultati";
-		cellaOfferte.appendChild(tabellaOfferte);
+		divOfferte = document.createElement("div");	//TODO: id?
+		cellaOfferte.appendChild(divOfferte);
 		
-		this.offerte = new InfoOfferte(gestore, riga3, tabellaOfferte);
+		this.listaOfferte = new ListaOggetti(gestore, Offerta, divOfferte,
+			function() {
+				caricaLista(this, "GET", "CercaProdotto?idProdotto=" + prodotto.ID, 
+					null, gestore.messaggio);
+			}
+		);
+		this.listaOfferte.hide();	// Le offerte sono sempre nascoste al momento della creazione
 		
 		//Sezione immagine
 		cellaImmagine = document.createElement("td");
@@ -87,13 +102,19 @@ function Prodotto(gestore, listaProdotti) {
 	};
 }
 
+/** 
+ * Ordine visualizzato nella sezione ordini, non possiede elementi interattivi
+ * @param {GestorePagina} gestore Gestore della pagina che contiene l'ordine
+ * @param {Node} listaOrdini Nodo che contiene la lista degli ordini
+ */
 function Ordine(gestore, listaOrdini) {
 	
 	this.listaOrdini = listaOrdini;
 	
 	this.update = function(ordine) {
-		var tabellaOrdine, riga1, riga2, riga3, cellaAcquisto, cellaIndirizzo, 
-			cellaLista, listaProdotti; 
+		
+		var tabellaOrdine, riga1, riga2, riga3, cellaAcquisto, 
+		cellaIndirizzo, cellaLista, listaProdotti; 
 			
 		tabellaOrdine = document.createElement("table");
 		this.listaOrdini.appendChild(tabellaOrdine);
@@ -107,6 +128,7 @@ function Ordine(gestore, listaOrdini) {
 		riga3 = document.createElement("tr");
 		tabellaOrdine.appendChild(riga3);
 		
+		// Sezione informazioni acquisto
 		cellaAcquisto = document.createElement("td");
 		cellaAcquisto.textContent = "Acquisto effettuato in data " + ordine.data + "\n" +
 									"Presso il venditore " + ordine.fornitore.nome + " - " + 
@@ -114,12 +136,14 @@ function Ordine(gestore, listaOrdini) {
 		cellaAcquisto.style = "white-space:pre";	//TODO: da fare in CSS 
 		riga1.appendChild(cellaAcquisto);
 		
+		// Sezione indirizzo di spedizione
 		cellaIndirizzo = document.createElement("td");
 		cellaIndirizzo.textContent =	"Con indirizzo di spedizione:" + "\n" +
 									 	indirizzo(ordine.indirizzo);
 		cellaIndirizzo.style = "white-space:pre";	//TODO: da fare in CSS 
 		riga2.appendChild(cellaIndirizzo);
 		
+		// Sezione elenco dei prodotti acquistati
 		cellaLista = document.createElement("td");
 		riga3.appendChild(cellaLista);
 		
@@ -127,9 +151,8 @@ function Ordine(gestore, listaOrdini) {
 		cellaLista.appendChild(listaProdotti);
 		
 		ordine.prodotti.forEach((prodotto) => {
-			var entryProdotto;
 			
-			entryProdotto = document.createElement("li");
+			var entryProdotto = document.createElement("li");
 			entryProdotto.textContent = prodotto.nome + " x" + prodotto.quantita;
 			listaProdotti.appendChild(entryProdotto);
 		});
@@ -137,14 +160,23 @@ function Ordine(gestore, listaOrdini) {
 	};
 }
 
+/**
+ * Carrello di prodotti associati ad uno specifico fornitore, se il flag "display" è posto a true
+ * vengono omesse le informazioni relative all'indirizzo di spedizione e al nome del fornitore 
+ * durante la visualizzazione
+ * @param {GestorePagina} gestore Gestore della pagina che contiene il carrello
+ * @param {Node} listaCarrelli Nodo che contiene la lista dei carrelli
+ * @param {Boolean} display Flag che identifica il tipo di visualizzazione del carrello
+ */
 function Carrello(gestore, listaCarrelli, display) {
 	
 	this.listaCarrelli = listaCarrelli;
 	this.display = display;
 	
 	this.update = function(carrello) {
-		var tabellaCarrello, riga1, riga2, riga3, cellaTotale, cellaPrezzoSpedizione, cellaSpedizione, formSpedizione, 
-		testoCitta, testoVia, testoNumero, testoCAP, bottoneSpedizione, label ,linebreak;
+		var tabellaCarrello, rigaFornitore, riga1, riga2, riga3, cellaFornitore, cellaTotale, 
+		cellaPrezzoSpedizione, cellaSpedizione, formSpedizione, testoCitta, testoVia, testoNumero, 
+		testoCAP, bottoneSpedizione, label, linebreak;
 		
 		var utente = infoUtente();
 		var indirizzo = utente.indirizzo;
@@ -153,6 +185,18 @@ function Carrello(gestore, listaCarrelli, display) {
 		tabellaCarrello.className = "tabellaProdotti";
 		this.listaCarrelli.appendChild(tabellaCarrello);
 		
+		// Nome del fornitore
+		if(!display) {
+			rigaFornitore = document.createElement("tr");
+			rigaFornitore.colSpan = "4";
+			tabellaCarrello.appendChild(rigaFornitore);
+			
+			cellaFornitore = document.createElement("td");
+			cellaFornitore.textContent = carrello.fornitore.nome;
+			rigaFornitore.appendChild(cellaFornitore);
+		}
+		
+		// Lista di prodotti all'interno del carrello
 		carrello.prodotti.forEach((prodotto) => {
 			
 			var riga, cellaImmagine, immagine, cellaNome, cellaQuantita, cellaPrezzo;
@@ -160,6 +204,7 @@ function Carrello(gestore, listaCarrelli, display) {
 			riga = document.createElement("tr");
 			tabellaCarrello.appendChild(riga);
 			
+			// Immagine del prodotto
 			cellaImmagine = document.createElement("td");
 			riga.appendChild(cellaImmagine);
 			
@@ -168,6 +213,7 @@ function Carrello(gestore, listaCarrelli, display) {
 			immagine.className = "immagineMedia";
 			cellaImmagine.appendChild(immagine);
 			
+			// Informazioni sul prodotto (nome, quantità e prezzo)
 			cellaNome = document.createElement("td");
 			cellaNome.textContent = prodotto.nome;
 			riga.appendChild(cellaNome);
@@ -195,6 +241,7 @@ function Carrello(gestore, listaCarrelli, display) {
 			riga3.colSpan = "4";
 			tabellaCarrello.appendChild(riga3);
 			
+			// Informazioni sul singolo ordine del carrello (totale e prezzo di spedizione)
 			cellaTotale = document.createElement("td");
 			cellaTotale.textContent = carrello.totaleCosto.toFixed(2) + " \u20AC";
 			riga1.appendChild(cellaTotale);
@@ -203,6 +250,7 @@ function Carrello(gestore, listaCarrelli, display) {
 			cellaPrezzoSpedizione.textContent = carrello.costoSpedizione.toFixed(2) + " \u20AC";
 			riga2.appendChild(cellaPrezzoSpedizione);
 			
+			// Form per la personalizzazione della spedizione	TODO: metodo a parte(?)
 			cellaSpedizione = document.createElement("td");
 			riga3.appendChild(cellaSpedizione);
 			
@@ -275,11 +323,17 @@ function Carrello(gestore, listaCarrelli, display) {
 			bottoneSpedizione.addEventListener("click", (e) => {
 				var form = e.target.closest("form");
 				if(form.checkValidity()) {
-					carrelloForm.value = ritornaCarrello(utente.id);
+					// Se il form per la spedizione risulta valido, vengono caricate le 
+					// informazioni relative al carrello dai cookie
+					carrelloForm.value = ritornaCookieCarrelloDaFornitore(utente.id, 
+						carrello.fornitore.ID);
+					// Viene fatta una chiamata al server per aggiungere l'ordine
 					makeCall("POST", "AggiungiOrdine", new FormData(form), gestore.messaggio, 
 						function() {
+							// Se la chiamata va a buon fine i cookie relativi al carrello
+							// vengono eliminati e vengono visualizzati gli ordini
 							carrelloForm.value = "";
-		              		cancellaCarrello(utente.id, carrello.fornitore.ID);
+		              		cancellaCookieCarrello(utente.id, carrello.fornitore.ID);
 							gestore.visOrdini();
 			        	}
 					);
@@ -293,172 +347,179 @@ function Carrello(gestore, listaCarrelli, display) {
 	};
 }
 
-function InfoOfferte(gestore, rigaOfferte, tabellaOfferte) {
+/**
+ * Offerta relativa ad un prodotto ed al suo fornitore
+ * @param {GestorePagina} gestore Gestore della pagina che contiene l'offerta
+ * @param {Node} listaOfferte Nodo che contiene la lista delle offerte
+ */
+function Offerta(gestore, listaOfferte) {
 	
-	this.rigaOfferte = rigaOfferte;
-	this.tabellaOfferte = tabellaOfferte;
-	this.rigaOfferte.hidden = true;	// Le offerte sono sempre nascoste al momento della creazione
-	
-	this.caricaOfferte = function(idProdotto) {
-		var self = this;
-		makeCall("GET", "CercaProdotto?idProdotto=" + idProdotto, 
-				null, gestore.messaggio, function(req) {
-	  		var offerte = JSON.parse(req.responseText);
-			self.update(offerte);
-        });
-	};
+	this.listaOfferte = listaOfferte;
 		
-	this.update = function(offerte) {
-		this.tabellaOfferte.innerHTML = ""; // Svuota la tabella
-		var self = this;
+	this.update = function(offerta) {
+
+		var rigaOff = new Array();
+		var tabellaOfferta, cellaFornitore, cellaCarrello, divSoglia, divNCarrello, 
+		divOverlayCarrello, divPrezzoCarrello, formCarrello, numeroCarrello, bottoneCarrello;
 		
-		offerte.forEach((offerta) => {
+		tabellaOfferta = document.createElement("table");
+		tabellaOfferta.className = "tabellaRisultati";	//TODO: css
+		this.listaOfferte.appendChild(tabellaOfferta);
 		
-			var rigaOff = new Array();
-			var cellaFornitore, cellaCarrello, divSoglia, divNCarrello, divOverlayCarrello,
-			divPrezzoCarrello, formCarrello, numeroCarrello, bottoneCarrello;
+		rigaOff[0] = document.createElement("tr");
+		tabellaOfferta.appendChild(rigaOff[0]);
+		
+		// Fornitore dell'offerta
+		cellaFornitore = document.createElement("td");
+		cellaFornitore.textContent =	offerta.fornitore.nome + " - " + 
+										offerta.fornitore.valutazione + " \u2605 - " + 
+										offerta.prezzo.toFixed(2) + " \u20AC";
+		cellaFornitore.rowSpan = offerta.fornitore.politica.length;
+		rigaOff[0].appendChild(cellaFornitore);
+		
+		// Politiche di spedizione dell'offerta
+		for(let i = 0; i < offerta.fornitore.politica.length; i++) {
 			
-			rigaOff[0] = document.createElement("tr");
-			self.tabellaOfferte.appendChild(rigaOff[0]);
+			var politica = offerta.fornitore.politica[i];
+			var rigaPolitica, cellaSpedizione, cellaMinimo, cellaMassimo
 			
-			cellaFornitore = document.createElement("td");
-			cellaFornitore.textContent =	offerta.fornitore.nome + " - " + 
-											offerta.fornitore.valutazione + " \u2605 - " + 
-											offerta.prezzo.toFixed(2) + " \u20AC";
-			cellaFornitore.rowSpan = offerta.fornitore.politica.length;
-			rigaOff[0].appendChild(cellaFornitore);
-			
-			for(let i = 0; i < offerta.fornitore.politica.length; i++) {
-				
-				var politica = offerta.fornitore.politica[i];
-				var rigaPolitica, cellaSpedizione, cellaMinimo, cellaMassimo
-				
-				if(rigaOff[i] !== undefined)
-					rigaPolitica = rigaOff[i];
-				else {
-					rigaPolitica = document.createElement("tr");
-					self.tabellaOfferte.appendChild(rigaPolitica);
-					rigaOff[i] = rigaPolitica;
-				}
-				
-				cellaSpedizione = document.createElement("td");
-				cellaSpedizione.textContent = 	"Fascia di spedizione: " + 
-												politica.prezzo.toFixed(2) + " \u20AC";
-				rigaPolitica.appendChild(cellaSpedizione);
-				
-				cellaMinimo = document.createElement("td");
-				cellaMinimo.textContent = "Numero minimo prodotti: " + politica.min;
-				rigaPolitica.appendChild(cellaMinimo);
-				
-				cellaMassimo = document.createElement("td");
-				cellaMassimo.textContent = "Numero massimo prodotti: " + politica.max;
-				rigaPolitica.appendChild(cellaMassimo);
+			if(rigaOff[i] !== undefined)
+				rigaPolitica = rigaOff[i];
+			else {
+				rigaPolitica = document.createElement("tr");
+				tabellaOfferta.appendChild(rigaPolitica);
+				rigaOff[i] = rigaPolitica;
 			}
 			
-			cellaCarrello = document.createElement("td");
-			cellaCarrello.rowSpan = offerta.fornitore.politica.length;
-			rigaOff[0].appendChild(cellaCarrello);
+			cellaSpedizione = document.createElement("td");
+			cellaSpedizione.textContent = 	"Fascia di spedizione: " + 
+											politica.prezzo.toFixed(2) + " \u20AC";
+			rigaPolitica.appendChild(cellaSpedizione);
 			
-			divSoglia = document.createElement("div");
-			divSoglia.textContent = 	"La soglia per la spedizione gratis \xE9 di " + 
-										offerta.fornitore.soglia + " \u20AC";
-			cellaCarrello.appendChild(divSoglia);
+			cellaMinimo = document.createElement("td");
+			cellaMinimo.textContent = "Numero minimo prodotti: " + politica.min;
+			rigaPolitica.appendChild(cellaMinimo);
 			
-			divNCarrello = document.createElement("div");
-			divOverlayCarrello = document.createElement("div");
-			divNCarrello.classList.add('overlaySource');
-			divOverlayCarrello.classList.add('overlay');
+			cellaMassimo = document.createElement("td");
+			cellaMassimo.textContent = "Numero massimo prodotti: " + politica.max;
+			rigaPolitica.appendChild(cellaMassimo);
+		}
+		
+		// Resoconto dell'offerta e azioni sul carrello
+		cellaCarrello = document.createElement("td");
+		cellaCarrello.rowSpan = offerta.fornitore.politica.length;
+		rigaOff[0].appendChild(cellaCarrello);
+		
+		divSoglia = document.createElement("div");
+		divSoglia.textContent =	"La soglia per la spedizione gratis \xE9 di " + 
+								offerta.fornitore.soglia + " \u20AC";
+		cellaCarrello.appendChild(divSoglia);
+		
+		// Numero di prodotti nel carrello
+		divNCarrello = document.createElement("div");
+		divNCarrello.classList.add('overlaySource');	//TODO: css
+		divNCarrello.textContent = "Numero di prodotti gi\xE1 nel carrello: " + 
+			numeroCookieProdottiDaFornitore(infoUtente().id, offerta.fornitore.ID);
+		
+		// Overlay relativo al numero di prodotti nel carrello, visualizzato al passaggio del mouse								
+		divOverlayCarrello = document.createElement("div");
+		divOverlayCarrello.classList.add('overlay');	//TODO: css
+		divOverlayCarrello.hidden = true;
+		
+		// Lista dei prodotti visualizzati all'interno dell'overlay
+		var listaOverlay = new ListaOggetti(this, Carrello, divOverlayCarrello, 
+			function() {
+				// Il contenuto dell'overlay è ottenuto tramite una chiamata al server per la
+				// visualizzazione del contenuto di un carrello specifico
+				caricaLista(this, "POST", "CaricaCarrello", 
+					ritornaCookieCarrelloDaFornitore(infoUtente().id, offerta.fornitore.ID), true);
+			},
+		true);
+		
+		// Listener per regolare l'apertura e la chiusura dell'overlay
+		divNCarrello.addEventListener("mouseenter", () => {
+			// Se l'overlay deve essere aperto, viene aggiornato con i contenuti del carrello
+			divOverlayCarrello.hidden = false;
+			listaOverlay.carica();
+		}, false);
+		divNCarrello.addEventListener("mouseleave", () => {
 			divOverlayCarrello.hidden = true;
-			divNCarrello.textContent =	"Numero di prodotti gi\xE1 nel carrello: " + 
-										numeroProdottiDaFornitore(infoUtente().id, //TODO: variabile per id
-											offerta.fornitore.ID);
-			var listaOverlay = new ListaOggetti(this,
-												Carrello,
-												divOverlayCarrello,
-												function() {
-													caricaLista(this, "POST", "CaricaCarrello", 
-														ritornaCarrelloDaFornitore(infoUtente().id, //TODO: variabile per id
-														offerta.fornitore.ID), true);
-												},
-												true
-			);
-			divNCarrello.addEventListener("mouseenter", () => {
-				divOverlayCarrello.hidden = false;
-				listaOverlay.carica();
-			}, false);
-			divNCarrello.addEventListener("mouseleave", () => {
-				divOverlayCarrello.hidden = true;
-			}, false);
-			divOverlayCarrello.addEventListener("mouseleave", () => {
-				divOverlayCarrello.hidden = true;
-			}, false);
+		}, false);
+		divOverlayCarrello.addEventListener("mouseleave", () => {
+			divOverlayCarrello.hidden = true;
+		}, false);
 
-			cellaCarrello.appendChild(divNCarrello);
-			divNCarrello.appendChild(divOverlayCarrello);
-			
-			
-			
-			divPrezzoCarrello = document.createElement("div");
-			divPrezzoCarrello.textContent =	"Valore dei prodotti gi\xE1 nel carrello: " + 
-												offerta.valore + " \u20AC";
-			cellaCarrello.appendChild(divPrezzoCarrello);
-			
-			formCarrello = document.createElement("form");
-			formCarrello.action = "#";
-			cellaCarrello.appendChild(formCarrello);
-			
-			numeroCarrello = document.createElement("input");
-			numeroCarrello.name = "quantita";
-			numeroCarrello.type = "number";
-			numeroCarrello.min = "1";
-			numeroCarrello.value = "1";
-			numeroCarrello.addEventListener("keypress", (e) => {
-				if (e.code === ENTER_KEY_CODE)
-					e.preventDefault();
-			}, false);
-			formCarrello.appendChild(numeroCarrello);
-			
-			bottoneCarrello = document.createElement("input");
-			bottoneCarrello.type = "button";
-			bottoneCarrello.value = "Inserisci";
-			bottoneCarrello.addEventListener("click", (e) => {
-				var form = e.target.closest("form");
-				if(form.checkValidity()) {
-					aggiungiCookie(	infoUtente().id, offerta.fornitore.ID, 
-									offerta.ID, form.quantita.value);	//TODO: limitare max prodotti
-					gestore.visCarrello();
-				}
-				else
-					form.reportValidity();
-			}, false);
-			formCarrello.appendChild(bottoneCarrello);
-		});
-	}
-	
-	this.isHidden = () => {
-		return this.rigaOfferte.hidden;
-	}
-	
-	this.toggleVisibilty = () => {
-		this.rigaOfferte.hidden = !this.rigaOfferte.hidden;
+		cellaCarrello.appendChild(divNCarrello);
+		divNCarrello.appendChild(divOverlayCarrello);
+		
+		divPrezzoCarrello = document.createElement("div");
+		divPrezzoCarrello.textContent =	"Valore dei prodotti gi\xE1 nel carrello: " + 
+										offerta.valore + " \u20AC";
+		cellaCarrello.appendChild(divPrezzoCarrello);
+		
+		// Form per l'aggiunta dell'offerta al carrello
+		formCarrello = document.createElement("form");
+		formCarrello.action = "#";
+		cellaCarrello.appendChild(formCarrello);
+		
+		// Numero di prodotti da aggiungere
+		numeroCarrello = document.createElement("input");
+		numeroCarrello.name = "quantita";
+		numeroCarrello.type = "number";
+		numeroCarrello.min = "1";
+		numeroCarrello.value = "1";
+		numeroCarrello.addEventListener("keypress", (e) => {
+			if (e.code === ENTER_KEY_CODE)
+				e.preventDefault();	// Previene l'invio del form dalla number box 
+		}, false);
+		formCarrello.appendChild(numeroCarrello);
+		
+		// Bottone d'invio del form
+		bottoneCarrello = document.createElement("input");
+		bottoneCarrello.type = "button";
+		bottoneCarrello.value = "Inserisci";
+		bottoneCarrello.addEventListener("click", (e) => {
+			var form = e.target.closest("form");
+			if(form.checkValidity()) {
+				// Se il form è valido i prodotti selezionati vengono aggiunti al carrello 
+				// tramite cookie e viene visualizzato il carrello
+				aggiungiCookieProdotto(infoUtente().id, offerta.fornitore.ID, 
+					offerta.ID, form.quantita.value);	//TODO: limitare max prodotti
+				gestore.visCarrello();
+			}
+			else
+				form.reportValidity();
+		}, false);
+		formCarrello.appendChild(bottoneCarrello);
 	}
 }
 
+/**
+ * Lista di oggetti generica, utilizzata per raggruppare più oggetti all'interno di una lista
+ * ai fini di una visualizzazione dinamica
+ * @param {GestorePagina} gestore Gestore della pagina che contiene la lista
+ * @param {Function} Oggetto Riferimento al costruttore dell'oggetto di cui si 
+ *							 vuole creare la lista
+ * @param {Node} divLista Nodo che contierrà la lista
+ * @param {Function} fCaricamento Funzione di caricamento della lista
+ * @param {Object} optOggetto Parametri opzionali per l'oggetto
+ */
 function ListaOggetti(gestore, Oggetto, divLista, fCaricamento, optOggetto) {
 		
 	this.divLista = divLista;
 	
 	this.carica = fCaricamento;
 	
-	this.update = function(prodotti) {
+	this.update = function(oggetti) {
 		this.show();
 		this.divLista.innerHTML = ""; // Svuota la lista
 		
 		var self = this;
 		
-		prodotti.forEach((prodotto) => {
+		// Inizializza ogni oggetto e chiama la funzione update su di esso
+		oggetti.forEach((oggetto) => {
 			var p = new Oggetto(gestore, self.divLista, optOggetto);
-			p.update(prodotto);
+			p.update(oggetto);
 		});
 	};
 	
@@ -468,5 +529,9 @@ function ListaOggetti(gestore, Oggetto, divLista, fCaricamento, optOggetto) {
 	
 	this.hide = () => {
 		this.divLista.hidden = true;
+	};
+	
+	this.isHidden = () => {
+		return this.divLista.hidden;
 	};
 }
