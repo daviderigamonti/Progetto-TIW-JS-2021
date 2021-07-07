@@ -51,7 +51,7 @@ public class AggiungiOrdine extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		
-		Gson gson = new GsonBuilder().setDateFormat("yyyy MMM dd").create();
+		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 		
 		Carrello carrello;
 		int idFornitore, idUtente, idIndirizzo;

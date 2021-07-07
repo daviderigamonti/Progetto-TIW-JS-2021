@@ -45,7 +45,7 @@ public class CaricaVisualizzati extends HttpServlet{
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		Gson gson = new GsonBuilder().setDateFormat("yyyy MMM dd").create();
+		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 		ProdottoDAO prodottoDAO = new ProdottoDAO(connection);
 		List<Integer> listaVisualizzati = new LinkedList<>();
 		List<Prodotto> prodotti = new ArrayList<Prodotto>();

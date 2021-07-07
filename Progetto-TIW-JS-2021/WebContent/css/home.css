@@ -1,0 +1,202 @@
+/**
+ * Home
+ */
+
+
+/* Generico */
+
+.divCentrato {
+	margin-left: 20%;
+	margin-right: 20%;
+	border-collapse: collapse;
+}
+
+.divCentrato table {
+	margin-bottom: 1em;
+}
+
+.tabellaCentrata, .barraMenu {
+	margin-left: auto;
+	margin-right: auto;
+	border-collapse: collapse;
+}
+
+.immagineGrande {
+	border-radius: 0.8em;
+	width: 10em;
+	height: 10em;
+}
+
+.immaginePiccola {
+	border-radius: 0.8em;
+	width: 9em;
+	height: 9em;
+}
+
+
+/* Barra menu */
+
+.barraMenu {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+table.barraMenu {
+	border-collapse: separate;
+ 	border-spacing: 100px 5px;
+}
+
+table.barraMenu input[type=text] {
+	width: 24em;
+}
+
+table.barraMenu input.bottoneNav {
+	background: none!important;
+	border: none;
+	padding: 0!important;
+	cursor: pointer;
+	text-decoration: none;
+	font-size: 105%;
+	color: blue;
+}
+
+
+/* Logout */
+
+.logUtente{	
+	position: absolute;
+	top: 0;
+	right: 0; 
+}
+
+
+/* Lista risultati */
+
+.tabellaProdotti, .tabellaRisultati {
+	width: 100%;
+}
+
+.tabellaProdotto td {
+	padding-right: 1em;
+}
+
+.testoProdotto {
+	font-size: 101%;
+	font-weight: bold;
+}
+
+/* Lista offerte */
+
+.tabellaOfferta {
+	width: 100%;
+	text-align: center;
+  	vertical-align: middle;
+}
+
+.tabellaOfferta tbody tr:nth-child(even) {
+ 	background-color: #F5F5F5;
+}
+
+.tabellaOfferta tbody tr:nth-child(odd) {
+ 	background-color: #DCDCDC;
+}
+
+.cellaFornitore {
+ 	background-color: #FFFFFF;
+ 	white-space:pre;
+}
+
+.divInfoOfferta {
+	display: inline-block;
+	width: 100%;
+}
+
+.divInfoOfferta div, .divInfoOfferta form {
+	display: inline;
+	vertical-align: 2em;
+	margin-bottom: 2.2em;
+	margin-left: 1em;
+	margin-right: 1em;
+}
+
+.divInfoOfferta input {
+	margin-left: 0.2em;
+}
+
+.overlaySource {
+    position: relative;
+}
+
+.overlay {
+    position: absolute;
+    top: 100%;
+    left: 0px;
+    background: #faf287;
+    opacity: 0;
+    height: 0;
+}
+
+.overlay .immaginePiccola{
+    border-radius: 0.5em;
+	width: 7em;
+	height: 7em;
+}
+
+.overlay table{
+    margin: 0;
+}
+
+.overlaySource:hover .overlay {
+	width: auto;
+    height: auto;
+    opacity: 0.9;
+    z-index: 1;
+    font-size: 85%;
+}
+
+
+/* Lista carrello */
+
+.tabellaCarrello {
+	margin: 0 auto;
+	border: 1px solid black;
+	width: 50%;
+	white-space: nowrap;
+}
+
+.tabellaCarrello th, .tabellaCarrello infoProdottoCarrello {
+	text-align: center;
+  	vertical-align: middle;
+}
+
+.tabellaCarrello td {
+	text-align: right;
+  	vertical-align: middle;
+}
+
+.tabellaCarrello .immagineCarrello {
+	width: 1%;
+    white-space: nowrap;
+}
+
+.tabellaCarrello input {
+	margin-top: 0.25em;
+	margin-bottom: 0.25em;
+	margin-right: 0.5em
+}
+
+
+/* Lista ordini */
+
+.tabellaOrdine {
+	margin: 0 auto;
+	border: 1px solid black;
+	width: 1%;
+	padding: 1em;
+	border-collapse: separate; 
+	border-spacing: 0 1em;
+}
+
+.tabellaOrdine td {
+	white-space: pre;
+}

@@ -52,7 +52,7 @@ public class CercaProdotto extends HttpServlet{
 			}
 		}
 		
-		Gson gson = new GsonBuilder().setDateFormat("yyyy MMM dd").create();
+		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 		String json = gson.toJson(offerte);
 		
 		response.setContentType("application/json");

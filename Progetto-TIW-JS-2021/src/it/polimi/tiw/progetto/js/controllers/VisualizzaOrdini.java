@@ -53,7 +53,7 @@ public class VisualizzaOrdini extends HttpServlet{
 			return;
 		}
 		
-		Gson gson = new GsonBuilder().setDateFormat("yyyy MMM dd").create();
+		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 		String json = gson.toJson(ordiniDaMostrare);
 		
 		response.setContentType("application/json");

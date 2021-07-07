@@ -48,7 +48,7 @@ public class CaricaCarrello extends HttpServlet{
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		
-		Gson gson = new GsonBuilder().setDateFormat("yyyy MMM dd").create();
+		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 		List<Carrello> carrelli = new ArrayList<Carrello>();
 		ProdottoDAO prodottoDAO = new ProdottoDAO(connection);
 		FornitoreDAO fornitoreDAO = new FornitoreDAO(connection);

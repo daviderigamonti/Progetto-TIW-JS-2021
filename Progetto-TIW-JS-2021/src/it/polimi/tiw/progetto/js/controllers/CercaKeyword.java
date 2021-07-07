@@ -52,7 +52,7 @@ public class CercaKeyword extends HttpServlet{
 		
 		request.getSession().setAttribute("listaProdotti", listaProdotti);
 		
-		Gson gson = new GsonBuilder().setDateFormat("yyyy MMM dd").create();
+		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 		String json = gson.toJson(listaProdotti);
 		
 		response.setContentType("application/json");

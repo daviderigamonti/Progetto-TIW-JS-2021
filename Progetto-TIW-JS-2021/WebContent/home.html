@@ -6,17 +6,29 @@
 		<script src="js/utils.js" charset="utf-8" defer></script>
 		<script src="js/homeElements.js" charset="utf-8" defer></script>
 		<script src="js/home.js" charset="utf-8" defer></script>
-		<link rel="stylesheet" href="css/style.css">
+		<link rel="stylesheet" href="css/home.css">
 	</head>
 	<body>
-		
-		<div id="menu" class="barraMenu">
-			<table>
+	
+		<div>
+			<table class="logUtente">
 				<tr>
-					<td><input id="bottoneHome" type="button" value="Home"></td>
-					<td><input id="bottoneCarrello" type="button" value="Carrello"></td>
-					<td><input id="bottoneOrdini" type="button" value="Ordini"></td>
-					
+					<td id="msgBnvenuto">
+						Felice di vederti <span id="nomeUtente"></span>
+					</td>
+					<td>
+						<input id="bottoneLogout" type="button" value="Logout">
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<div id="menu">
+			<table class="barraMenu">
+				<tr>
+					<td><input id="bottoneHome" type="button" value="Home" class="bottoneNav"></td>
+					<td><input id="bottoneCarrello" type="button" value="Carrello" class="bottoneNav"></td>
+					<td><input id="bottoneOrdini" type="button" value="Ordini" class="bottoneNav"></td>
 					<td>
 						<form id="formRicerca" action="#">
 							Inserisci una parola chiave per la ricerca nel catalogo: 
@@ -26,10 +38,8 @@
 					</td>
 				</tr>
 			</table>
-			<div id="msgBnvenuto">
-				Felice di vederti <span id="nomeUtente"></span>
-			</div>
-			<input id="bottoneLogout" type="button" value="Logout">
+			
+			
 		</div>
 		
 		<div id="messaggio"></div>

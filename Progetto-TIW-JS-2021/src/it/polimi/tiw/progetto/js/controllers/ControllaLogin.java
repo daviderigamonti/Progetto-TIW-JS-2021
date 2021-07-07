@@ -68,7 +68,7 @@ public class ControllaLogin extends HttpServlet {
 		} else {
 			request.getSession().setAttribute("utente", usr);
 			
-			Gson gson = new GsonBuilder().setDateFormat("yyyy MMM dd").create();
+			Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 			String json = gson.toJson(usr);
 			
 			response.setContentType("application/json");
