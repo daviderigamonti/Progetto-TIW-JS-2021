@@ -46,7 +46,7 @@ function makeCall(httpMethod, url, data, responseTag, callBack, json) {
           		window.location.href = DEFAULT_PAGE;
 			}
 			else
-				responseTag.textContent = req.responseText;
+				responseTag.textContent = "Error: " + req.status + " - " + req.statusText;
 		}
 	};
 	

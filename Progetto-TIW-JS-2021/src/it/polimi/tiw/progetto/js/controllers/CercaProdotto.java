@@ -12,14 +12,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import it.polimi.tiw.progetto.js.beans.Prodotto;
 import it.polimi.tiw.progetto.js.dao.ProdottoDAO;
 import it.polimi.tiw.progetto.js.utils.GestoreConnessione;
-import it.polimi.tiw.progetto.js.utils.IdException;
-
 
 @WebServlet("/CercaProdotto")
 public class CercaProdotto extends HttpServlet{
@@ -37,26 +37,33 @@ public class CercaProdotto extends HttpServlet{
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		
-		ProdottoDAO prodottoDAO = new ProdottoDAO(connection);
-		List<Prodotto> offerte = new ArrayList<Prodotto>();
+		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 		
-		if(request.getParameter("idProdotto") != null) {
-			try {
-				offerte = prodottoDAO.prendiOfferteByIdProdotto(Integer.parseInt(request.getParameter("idProdotto")));
-			} catch (SQLException e) {
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Impossibile recuperare prodotti da id");
-				return;
-			}catch (IdException e) {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-				return;
-			}
+		List<Prodotto> offerte = new ArrayList<Prodotto>();
+		String idProdotto = "";
+		
+		ProdottoDAO prodottoDAO = new ProdottoDAO(connection);
+		
+		// Recupera un prodotto dal database dato il suo id
+		try {
+			idProdotto = StringEscapeUtils.escapeJava(request.getParameter("idProdotto"));
+			if (idProdotto != null && !idProdotto.equals(""))
+					offerte = prodottoDAO.prendiOfferteByIdProdotto(Integer.parseInt(idProdotto));
+		} catch (SQLException e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Impossibile recuperare prodotti da id");
+			return;
+		} catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Id non esistente");
+			return;
 		}
 		
-		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 		String json = gson.toJson(offerte);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
+		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().write(json);
 	}
 	

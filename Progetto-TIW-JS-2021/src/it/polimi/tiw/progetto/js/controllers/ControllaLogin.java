@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -40,41 +42,51 @@ public class ControllaLogin extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String email = null;
-		String psw = null;
+		
+		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+		
+		Utente usr = null;
+		String email = "";
+		String psw = "";
+		
+		UtenteDAO usrDao = new UtenteDAO(connection);
+		
+		// Controlla l'esistenza delle credenziali di accesso
 		try {
-			email = request.getParameter("email");
-			psw = request.getParameter("psw");
+			email = StringEscapeUtils.escapeJava(request.getParameter("email"));
+			psw = StringEscapeUtils.escapeJava(request.getParameter("psw"));
 			if (email == null || psw == null || email.isEmpty() || psw.isEmpty()) 
 				throw new Exception("Credenziali mancanti o inesistenti");
 		} catch (Exception e) {
-			// for debugging only e.printStackTrace();
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Credenziali non presenti");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Credenziali non presenti");
 			return;
 		}
 		
-		UtenteDAO usrDao = new UtenteDAO(connection);
-		Utente usr = null;
+		// Controlla la validità delle credenziali di accesso
 		try {
 			usr = usrDao.controllaCredenziali(email, psw);
 		} catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Impossibile controllare le credenziali");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Impossibile controllare le credenziali");
 			return;
 		}
 		
-		if (usr == null) {
+		if (usr == null) {	
+			// Se le credenziali non sono valide viene ritornato un messaggio di errore
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			response.getWriter().println("Credenziali non valide");
-		} else {
+		} 
+		else {
+			//Se le credenziali sono valide l'utente viene aggiunto alla sessione
 			request.getSession().setAttribute("utente", usr);
-			
-			Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+
 			String json = gson.toJson(usr);
 			
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
-			response.getWriter().write(json);
 			response.setStatus(HttpServletResponse.SC_OK);
+			response.getWriter().write(json);
 		}
 	}
 	

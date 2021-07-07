@@ -37,27 +37,32 @@ public class VisualizzaOrdini extends HttpServlet{
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		
+		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+		
 		List<Ordine> ordiniDaMostrare = new ArrayList<Ordine>();
+		
 		OrdineDAO ordineDAO = new OrdineDAO(connection);
+		
 		HttpSession s = request.getSession(); 
 		
-		//mostro tutti gli ordini presi dal db
-
+		// Ottengo tutti gli ordini associati ad un id utente
 		try {
 			ordiniDaMostrare = ordineDAO.prendiOrdiniByIdUtente(((Utente)s.getAttribute("utente")).getId());
-		}catch(SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Impossibile prendere ordine da id utente");
-			e.printStackTrace();
-		}catch (IdException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+		} catch (SQLException e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Impossibile ottenere ordine da id utente");
+			return;
+		} catch (IdException e) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Id utente non esistente");
 			return;
 		}
 		
-		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
 		String json = gson.toJson(ordiniDaMostrare);
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
+		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().write(json);
 	}
 

@@ -22,11 +22,15 @@ public class Logout extends HttpServlet {
 			throws ServletException, IOException {
 
 		HttpSession session = request.getSession(false);
-		if (session != null) {
+		
+		// Se esiste una sessione viene invalidata
+		if (session != null) 
 			session.invalidate();
-		}
+		
+		// Il client viene reindirizzato alla pagina di login
 		String path = getServletContext().getContextPath() + "/login.html";
 		response.sendRedirect(path);
+		
 		return;
 	}
 

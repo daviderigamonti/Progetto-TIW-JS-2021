@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -55,6 +57,7 @@ public class AggiungiOrdine extends HttpServlet {
 		
 		Carrello carrello;
 		int idFornitore, idUtente, idIndirizzo;
+		String citta = "", via = "", cap = "", numero = "";
 		List<Prodotto> prodottiUtente = new ArrayList<Prodotto>();
 		float totale;
 		
@@ -66,62 +69,82 @@ public class AggiungiOrdine extends HttpServlet {
 		HttpSession s = request.getSession(); 
 		
 		try {	
-			List<Carrello> carrelli = Arrays.asList(gson.fromJson(request.getParameter("carrello"), Carrello[].class));
+			// Caricamento del carrello dal JSON
+			List<Carrello> carrelli = Arrays.asList(
+					gson.fromJson(request.getParameter("carrello"), Carrello[].class));
 			if (carrelli == null || carrelli.size() < 1) 
 				throw new Exception("Richiesta malformata");
+			
+			// Selezione del primo carrello e completamento delle informazioni
 			carrello = carrelli.get(0);
 			idFornitore = carrello.getFornitore().getID();
 			idUtente = ((Utente)s.getAttribute("utente")).getId();
 			if(!fornitoreDAO.esisteFornitore(idFornitore))
 				throw new Exception("ID fornitore non riconosciuto");
-			if(request.getParameter("citta") == null || request.getParameter("citta").isEmpty() || 
-					request.getParameter("via") == null || request.getParameter("via").isEmpty() ||
-					request.getParameter("cap") == null || request.getParameter("cap").isEmpty() ||
-					request.getParameter("numero") == null || request.getParameter("numero").isEmpty())
+			
+			// Caricamento informazioni relative all'indirizzo
+			citta = StringEscapeUtils.escapeJava(request.getParameter("citta"));
+			via = StringEscapeUtils.escapeJava(request.getParameter("via"));
+			cap = StringEscapeUtils.escapeJava(request.getParameter("cap"));
+			numero = StringEscapeUtils.escapeJava(request.getParameter("numero"));
+			if (citta == null || citta.isEmpty() || via == null || via.isEmpty() || 
+					cap == null || cap.isEmpty() || numero == null || numero.isEmpty())
 						throw new Exception("Campi indirizzo assenti");
+			
 		} catch (Exception e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println(e.getMessage());
 			return;
 		}
 		
-		for(Prodotto p : carrello.getProdotti()) {
+		// Recupero dei prodotti da aggiungere
+		for (Prodotto p : carrello.getProdotti()) {
 			try {
 				Prodotto daAggiungere = prodottoDAO.prendiProdottoByIdProdottoFornitore(p.getID(), idFornitore);
 				daAggiungere.setQuantita(p.getQuantita());
 				prodottiUtente.add(daAggiungere);
 			} catch (SQLException e) {
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Impossibile recuperare prodotti da id prodotto e id fornitore");
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.getWriter().println("Impossibile recuperare prodotti da id prodotto e id fornitore");
 				return;
-			}catch (IdException e) {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+			} catch (IdException e) {
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().println("Prodotti non esistenti");
 				return;
 			}
 		}
 		
-		try {  //calcolo costi dell'ordine
+		// Calcolo costi dell'ordine
+		try {  
 			totale = CalcoloCosti.calcolaTotale(prodottiUtente, fornitoreDAO.prendiFornitoreById(idFornitore));
-		}catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Impossibile recuperare fornitore da ID");
+		} catch (SQLException e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Impossibile recuperare fornitore da ID");
 			return;
-		}catch (IdException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-			return;
-		}
-		
-		try {  //gestione indirizzo dell'ordine
-			idIndirizzo = indirizzoDAO.prendiIdIndirizzoByParam(request.getParameter("citta"), request.getParameter("via"), 
-					request.getParameter("cap"), Integer.parseInt(request.getParameter("numero")));
-		}catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Impossibile recuperare valore indirizzo");
+		} catch (IdException e) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Fornitori non esistenti");
 			return;
 		}
 		
-		try {  //aggiunta ordine nel db
+		// Gestione indirizzo dell'ordine
+		try {  
+			idIndirizzo = indirizzoDAO.prendiIdIndirizzoByParam(citta, via, cap, Integer.parseInt(numero));
+		} catch (SQLException e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Impossibile recuperare valore indirizzo");
+			return;
+		}
+		
+		// Aggiunta ordine nel db
+		try {  
 			ordineDAO.aggiungiOrdine(totale, idIndirizzo, idUtente, idFornitore, prodottiUtente);
-		}catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Impossibile aggiungere ordine");
+		} catch (SQLException e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Impossibile aggiungere ordine");
 			return;
 		}
+		
 		response.setStatus(HttpServletResponse.SC_OK);
 	}
 	

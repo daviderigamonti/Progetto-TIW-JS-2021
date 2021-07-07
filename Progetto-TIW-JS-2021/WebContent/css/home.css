@@ -33,6 +33,11 @@
 	height: 9em;
 }
 
+.messaggio {
+	color: red;
+	text-decoration: underline;
+}
+
 
 /* Barra menu */
 

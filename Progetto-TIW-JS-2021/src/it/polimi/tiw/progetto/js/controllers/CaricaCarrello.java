@@ -49,27 +49,31 @@ public class CaricaCarrello extends HttpServlet{
 			throws ServletException, IOException {
 		
 		Gson gson = new GsonBuilder().setDateFormat("dd/MM/yyyy").create();
+		
 		List<Carrello> carrelli = new ArrayList<Carrello>();
+		
 		ProdottoDAO prodottoDAO = new ProdottoDAO(connection);
 		FornitoreDAO fornitoreDAO = new FornitoreDAO(connection);
 		
 		try {
+			// Caricamento informazioni sui carrelli da JSON
 			String postContent = request.getReader().lines()
 					.collect(Collectors.joining(System.lineSeparator()));
 			carrelli = Arrays.asList(gson.fromJson(postContent, Carrello[].class));
 			if (carrelli == null) 
-				throw new Exception("Credenziali mancanti o inesistenti");
+				throw new Exception("Richiesta malformata");
 		} catch (Exception e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Credenziali non presenti");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println(e.getMessage());
 			return;
 		}
 		
 		// Completa i beans importati dal JSON e calcola prezzo totale e costi di spedizione
 		try {
-			for(Carrello c : carrelli) {
+			for (Carrello c : carrelli) {
 				c.setFornitore(fornitoreDAO.prendiFornitoreById(c.getFornitore().getID()));
 				List<Prodotto> prodottiCompleti = new ArrayList<>();
-				for(Prodotto p : c.getProdotti()) {
+				for (Prodotto p : c.getProdotti()) {
 					Prodotto temp = prodottoDAO.prendiProdottoByIdProdottoFornitore(
 							p.getID(), c.getFornitore().getID());
 					temp.setQuantita(p.getQuantita());
@@ -81,10 +85,12 @@ public class CaricaCarrello extends HttpServlet{
 				c.setTotaleCosto(CalcoloCosti.calcolaPrezzo(c.getProdotti()));
 			}
 		} catch (SQLException e) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Impossibile recuperare fornitore da cookie");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Impossibile recuperare informazioni da ID");
 			return;
 		} catch (IdException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Informazioni non esistenti");
 			return;
 		}
 		
@@ -92,6 +98,7 @@ public class CaricaCarrello extends HttpServlet{
 		
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
+		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().write(json);
 	}
 	

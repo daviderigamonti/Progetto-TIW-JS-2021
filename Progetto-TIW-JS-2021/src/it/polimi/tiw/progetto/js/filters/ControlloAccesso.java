@@ -30,9 +30,10 @@ public class ControlloAccesso implements Filter {
 		String loginpath = req.getServletContext().getContextPath() + "/login.html";
 
 		HttpSession s = req.getSession();
+		
 		if (s.isNew() || s.getAttribute("utente") == null) {
 			System.out.print("Accesso proibito\n"); 
-			res.setStatus(403);
+			res.setStatus(HttpServletResponse.SC_FORBIDDEN);
 			res.setHeader("Location", loginpath);
 			return;
 		}

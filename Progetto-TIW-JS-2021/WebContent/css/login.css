@@ -26,3 +26,8 @@ table.tabellaLogin input[type=button] {
 table.tabellaLogin td[colspan="2"] {
 	text-align: center;
 }
+
+.messaggio {
+	color: red;
+	text-decoration: underline;
+}
