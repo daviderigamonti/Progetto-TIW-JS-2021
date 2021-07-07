@@ -3,7 +3,7 @@
  */
  
 .divLogin{
-	margin-top: 105px;
+	margin-top: 8em;
 	font-size: 150%;
 }
 
@@ -15,12 +15,12 @@
 
 table.tabellaLogin input[type=email], table.tabellaLogin input[type=password] {
 	font-size: 90%;
-	width: 350px;
+	width: 16em;
 }
 
 table.tabellaLogin input[type=button] {
 	font-size: 90%;
-	width: 100px;
+	width: 5em;
 }
 
 table.tabellaLogin td[colspan="2"] {

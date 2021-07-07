@@ -43,7 +43,7 @@
 
 table.barraMenu {
 	border-collapse: separate;
- 	border-spacing: 100px 5px;
+ 	border-spacing: 5.4em 1em;
 }
 
 table.barraMenu input[type=text] {
@@ -63,7 +63,7 @@ table.barraMenu input.bottoneNav {
 
 /* Logout */
 
-.logUtente{	
+.logUtente {	
 	position: absolute;
 	top: 0;
 	right: 0; 
@@ -136,13 +136,13 @@ table.barraMenu input.bottoneNav {
     height: 0;
 }
 
-.overlay .immaginePiccola{
+.overlay .immaginePiccola {
     border-radius: 0.5em;
 	width: 7em;
 	height: 7em;
 }
 
-.overlay table{
+.overlay table {
     margin: 0;
 }
 
