@@ -30,6 +30,7 @@ import it.polimi.tiw.progetto.js.dao.ProdottoDAO;
 import it.polimi.tiw.progetto.js.utils.CalcoloCosti;
 import it.polimi.tiw.progetto.js.utils.GestoreConnessione;
 import it.polimi.tiw.progetto.js.utils.IdException;
+import it.polimi.tiw.progetto.js.utils.ServletErrorResponse;
 
 @WebServlet("/AggiungiOrdine")
 @MultipartConfig
@@ -92,8 +93,9 @@ public class AggiungiOrdine extends HttpServlet {
 						throw new Exception("Campi indirizzo assenti");
 			
 		} catch (Exception e) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println(e.getMessage());
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST, 
+					e.getMessage());
 			return;
 		}
 		
@@ -104,12 +106,14 @@ public class AggiungiOrdine extends HttpServlet {
 				daAggiungere.setQuantita(p.getQuantita());
 				prodottiUtente.add(daAggiungere);
 			} catch (SQLException e) {
-				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				response.getWriter().println("Impossibile recuperare prodotti da id prodotto e id fornitore");
+				ServletErrorResponse.createResponse(response, 
+						HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+						"Impossibile recuperare prodotti da id prodotto e id fornitore");
 				return;
 			} catch (IdException e) {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().println("Prodotti non esistenti");
+				ServletErrorResponse.createResponse(response, 
+						HttpServletResponse.SC_BAD_REQUEST, 
+						"Prodotti non esistenti");
 				return;
 			}
 		}
@@ -118,12 +122,14 @@ public class AggiungiOrdine extends HttpServlet {
 		try {  
 			totale = CalcoloCosti.calcolaTotale(prodottiUtente, fornitoreDAO.prendiFornitoreById(idFornitore));
 		} catch (SQLException e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Impossibile recuperare fornitore da ID");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+					"Impossibile recuperare fornitore da ID");
 			return;
 		} catch (IdException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("Fornitori non esistenti");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST, 
+					"Fornitori non esistenti");
 			return;
 		}
 		
@@ -131,8 +137,9 @@ public class AggiungiOrdine extends HttpServlet {
 		try {  
 			idIndirizzo = indirizzoDAO.prendiIdIndirizzoByParam(citta, via, cap, Integer.parseInt(numero));
 		} catch (SQLException e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Impossibile recuperare valore indirizzo");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+					"Impossibile recuperare valore indirizzo");
 			return;
 		}
 		
@@ -140,8 +147,9 @@ public class AggiungiOrdine extends HttpServlet {
 		try {  
 			ordineDAO.aggiungiOrdine(totale, idIndirizzo, idUtente, idFornitore, prodottiUtente);
 		} catch (SQLException e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Impossibile aggiungere ordine");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+					"Impossibile aggiungere ordine");
 			return;
 		}
 		

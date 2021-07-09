@@ -25,6 +25,7 @@ import it.polimi.tiw.progetto.js.dao.ProdottoDAO;
 import it.polimi.tiw.progetto.js.utils.CalcoloCosti;
 import it.polimi.tiw.progetto.js.utils.GestoreConnessione;
 import it.polimi.tiw.progetto.js.utils.IdException;
+import it.polimi.tiw.progetto.js.utils.ServletErrorResponse;
 
 @WebServlet("/CaricaCarrello")
 @MultipartConfig
@@ -63,8 +64,9 @@ public class CaricaCarrello extends HttpServlet{
 			if (carrelli == null) 
 				throw new Exception("Richiesta malformata");
 		} catch (Exception e) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println(e.getMessage());
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST, 
+					e.getMessage());
 			return;
 		}
 		
@@ -85,12 +87,14 @@ public class CaricaCarrello extends HttpServlet{
 				c.setTotaleCosto(CalcoloCosti.calcolaPrezzo(c.getProdotti()));
 			}
 		} catch (SQLException e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Impossibile recuperare informazioni da ID");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+					"Impossibile recuperare informazioni da ID");
 			return;
 		} catch (IdException e) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("Informazioni non esistenti");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST, 
+					"Informazioni non esistenti");
 			return;
 		}
 		

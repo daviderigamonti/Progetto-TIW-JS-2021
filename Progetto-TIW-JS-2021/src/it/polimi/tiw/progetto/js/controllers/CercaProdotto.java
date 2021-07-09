@@ -20,6 +20,7 @@ import com.google.gson.GsonBuilder;
 import it.polimi.tiw.progetto.js.beans.Prodotto;
 import it.polimi.tiw.progetto.js.dao.ProdottoDAO;
 import it.polimi.tiw.progetto.js.utils.GestoreConnessione;
+import it.polimi.tiw.progetto.js.utils.ServletErrorResponse;
 
 @WebServlet("/CercaProdotto")
 public class CercaProdotto extends HttpServlet{
@@ -50,12 +51,14 @@ public class CercaProdotto extends HttpServlet{
 			if (idProdotto != null && !idProdotto.equals(""))
 					offerte = prodottoDAO.prendiOfferteByIdProdotto(Integer.parseInt(idProdotto));
 		} catch (SQLException e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Impossibile recuperare prodotti da id");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+					"Impossibile recuperare prodotti da id");
 			return;
 		} catch (Exception e) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("Id non esistente");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST, 
+					"Id non esistente");
 			return;
 		}
 		

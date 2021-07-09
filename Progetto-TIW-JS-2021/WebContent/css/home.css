@@ -33,9 +33,16 @@
 	height: 9em;
 }
 
-.messaggio {
+.messaggioErrore {
 	color: red;
 	text-decoration: underline;
+	text-align: center;
+}
+
+.messaggioNotifica {
+	color: gray;
+	font-weight: bold;
+	text-align: center;
 }
 
 

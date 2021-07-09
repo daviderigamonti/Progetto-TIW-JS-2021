@@ -23,6 +23,7 @@ import it.polimi.tiw.progetto.js.beans.Prodotto;
 import it.polimi.tiw.progetto.js.dao.ProdottoDAO;
 import it.polimi.tiw.progetto.js.utils.GestoreConnessione;
 import it.polimi.tiw.progetto.js.utils.IdException;
+import it.polimi.tiw.progetto.js.utils.ServletErrorResponse;
 
 @WebServlet("/CaricaVisualizzati")
 public class CaricaVisualizzati extends HttpServlet{
@@ -60,8 +61,9 @@ public class CaricaVisualizzati extends HttpServlet{
 			if (listaVisualizzati == null) 
 				throw new Exception("Richiesta malformata");
 		} catch (Exception e) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println(e.getMessage());
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST, 
+					e.getMessage());
 			return;
 		}
 		
@@ -72,12 +74,14 @@ public class CaricaVisualizzati extends HttpServlet{
 				try {
 					prodotti.add(prodottoDAO.prendiProdottoById(id));
 				} catch (SQLException e) {
-					response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-					response.getWriter().println("Impossibile recuperare prodotti già visualizzati");
+					ServletErrorResponse.createResponse(response, 
+							HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+							"Impossibile recuperare prodotti già visualizzati");
 					return;
 				} catch (IdException e) {
-					response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-					response.getWriter().println("Prodotti già visualizzati non esistenti");
+					ServletErrorResponse.createResponse(response, 
+							HttpServletResponse.SC_BAD_REQUEST, 
+							"Prodotti già visualizzati non esistenti");
 					return;
 				}
 		}
@@ -85,10 +89,11 @@ public class CaricaVisualizzati extends HttpServlet{
 		// Completa i 5 prodotti da visualizzare con prodotti random, se necessari
 		if (prodotti.size() < 5) {   
 			try {
-				prodotti.addAll(prodottoDAO.prendiProdotti(listaVisualizzati, 5 - prodotti.size()));	//TODO: prodotti non random!
+				prodotti.addAll(prodottoDAO.prendiProdotti(listaVisualizzati, 5 - prodotti.size()));
 			} catch (SQLException e) {
-				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				response.getWriter().println("Impossibile recuperare prodotti casuali");
+				ServletErrorResponse.createResponse(response, 
+						HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+						"Impossibile recuperare prodotti casuali");
 				return;
 			}
 		}

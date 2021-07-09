@@ -18,6 +18,7 @@ import com.google.gson.GsonBuilder;
 
 import it.polimi.tiw.progetto.js.utils.GestoreConnessione;
 import it.polimi.tiw.progetto.js.utils.IdException;
+import it.polimi.tiw.progetto.js.utils.ServletErrorResponse;
 import it.polimi.tiw.progetto.js.beans.*;
 import it.polimi.tiw.progetto.js.dao.OrdineDAO;
 
@@ -49,12 +50,14 @@ public class VisualizzaOrdini extends HttpServlet{
 		try {
 			ordiniDaMostrare = ordineDAO.prendiOrdiniByIdUtente(((Utente)s.getAttribute("utente")).getId());
 		} catch (SQLException e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Impossibile ottenere ordine da id utente");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+					"Impossibile ottenere ordine da id utente");
 			return;
 		} catch (IdException e) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("Id utente non esistente");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST, 
+					"Id utente non esistente");
 			return;
 		}
 		

@@ -9,10 +9,10 @@
 		var messaggio = document.getElementById("erroreLogin");
 		if(form.checkValidity()) {
 			makeCall("POST", "ControllaLogin", new FormData(form), messaggio, function(req) {
-				let utente = JSON.parse(req.responseText);
+				var utente = JSON.parse(req.responseText);
 				window.sessionStorage.setItem(SESSIONE_UTENTE, JSON.stringify(utente));
 				window.location.href = "home.html";
-			});
+			}, null, true);
 		}
 		else
 			form.reportValidity();

@@ -20,6 +20,7 @@ import com.google.gson.GsonBuilder;
 import it.polimi.tiw.progetto.js.beans.Prodotto;
 import it.polimi.tiw.progetto.js.dao.ProdottoDAO;
 import it.polimi.tiw.progetto.js.utils.GestoreConnessione;
+import it.polimi.tiw.progetto.js.utils.ServletErrorResponse;
 
 @WebServlet("/CercaKeyword")
 public class CercaKeyword extends HttpServlet{
@@ -50,12 +51,14 @@ public class CercaKeyword extends HttpServlet{
 			if (keyword != null && !keyword.equals(""))
 					listaProdotti = prodottoDAO.prendiProdottiByKeyword(keyword);
 		} catch (SQLException e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Impossibile recuperare prodotti da keyword");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+					"Impossibile recuperare prodotti da keyword");
 			return;
 		} catch (Exception e) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("Keyword non esistente");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST, 
+					"Keyword non esistente");
 			return;
 		}
 		

@@ -6,7 +6,8 @@ const HTTP_CODES = {
 	success			: 200,
 	badRequest		: 400,
 	unauthorized	: 401,
-	forbidden		: 403
+	forbidden		: 403,
+	unavailable		: 404
 }
 
 const ENTER_KEY_CODE = "Enter";
@@ -30,8 +31,10 @@ const DEFAULT_PAGE = "login.html";
  * 							  positiva dal server
  * @param {Boolean} json Flag utilizzato per indicare se i dati aggiuntivi specificati nel
  * 						 parametro "data" siano di tipo JSON
+ * @param {Boolean} login Flag utilizzato per indicare se la chiamata arriva da una richiesta
+ * 						  di autenticazione (per la gestione di HTTP_CODES.unauthorized)
  */
-function makeCall(httpMethod, url, data, responseTag, callBack, json) {
+function makeCall(httpMethod, url, data, responseTag, callBack, json, login) {
 	
 	var req = new XMLHttpRequest();
 	
@@ -39,14 +42,23 @@ function makeCall(httpMethod, url, data, responseTag, callBack, json) {
 		if(req.readyState == XMLHttpRequest.DONE) {
 			if(req.status == HTTP_CODES.success) 
 				callBack(req);
-			else if (req.status == HTTP_CODES.unauthorized || req.status == HTTP_CODES.forbidden) {
-				// Nel caso l'utente non abbia effettuato l'accesso o non possieda i privilegi
-				// per visualizzare una determinata risorsa, viene rispedito alla pagina di default
-				window.sessionStorage.removeItem(SESSIONE_UTENTE);
-          		window.location.href = DEFAULT_PAGE;
+			else if(req.status == HTTP_CODES.unauthorized && !login || 
+				req.status == HTTP_CODES.forbidden) {
+					// Nel caso l'utente non abbia effettuato l'accesso o non possieda i privilegi
+					// per visualizzare una determinata risorsa, viene rispedito alla pagina 
+					// di default (a meno che l'utente non stia tentando di autenticarsi)
+					window.sessionStorage.removeItem(SESSIONE_UTENTE);
+	          		window.location.href = DEFAULT_PAGE;
 			}
-			else
-				responseTag.textContent = "Error: " + req.status + " - " + req.statusText;
+			else {
+				responseTag.className = "messaggioErrore";
+				if(req.status == HTTP_CODES.unavailable && !req.responseText)	
+					// Nel caso avvenga un errore durante l'inizializzazione della servlet
+					responseTag.textContent = "Errore: " + req.status + 
+						" - Risorsa non disponibile";
+				else
+					responseTag.textContent = "Errore: " + req.status + " - " + req.responseText;
+			}
 		}
 	};
 	
@@ -71,12 +83,18 @@ function makeCall(httpMethod, url, data, responseTag, callBack, json) {
  * @param {Node} responseTag Nodo da utilizzare per visualizzare il messaggio di risposta
  * @param {Boolean} json Flag utilizzato per indicare se i dati aggiuntivi specificati nel
  * 						 parametro "data" siano di tipo JSON
+ * @param {String} emptyMessage Messaggio da visualizzare nel caso la lista sia vuota
  */
-function caricaLista(self, httpMethod, url, data, responseTag, json) {
+function caricaLista(self, httpMethod, url, data, responseTag, json, emptyMessage) {
 	makeCall(httpMethod, url, data, responseTag, function(req) {
 		var elementi = JSON.parse(req.responseText);
-		if (elementi.length == 0)
+		if(elementi.length == 0) {
+			if(emptyMessage) {
+				responseTag.className = "messaggioNotifica";
+				responseTag.textContent = emptyMessage; 
+			}
 			return;
+		}
 		self.update(elementi);
 	}, json);
 }
@@ -150,7 +168,7 @@ function aggiungiCookieProdotto(idUtente, idFornitore, idProdotto, quantita) {
 	// Aggiungo id utente e fornitore
 	var cookie = idUtente + COOKIE_VALORI_SEP + idFornitore + "=";
 	if(prodotti)
-		for(var i = 0; i < prodotti.length; i++) {
+		for(let i = 0; i < prodotti.length; i++) {
 			if(i != 0)
 				cookie += COOKIE_PRODOTTI_SEP;
 			cookie += prodotti[i].ID + COOKIE_VALORI_SEP;
@@ -186,7 +204,7 @@ function ritornaCookieProdotti(idUtente, idFornitore) {
   	var decodedCookie = decodeURIComponent(document.cookie);
 	var ca = decodedCookie.split(';');
 	// Estrapolazione del valore
-  	for(var i = 0; i < ca.length; i++) {
+  	for(let i = 0; i < ca.length; i++) {
     	var c = ca[i];
     	while (c.charAt(0) == ' ')
      		 c = c.substring(1);
@@ -195,7 +213,7 @@ function ritornaCookieProdotti(idUtente, idFornitore) {
 			var va = valore.split(COOKIE_PRODOTTI_SEP);
 			var prodotti = new Array();
 			// Estrapolazione dei prodotti
-			for(var j = 0; j < va.length; j++) {
+			for(let j = 0; j < va.length; j++) {
 				var v = va[j];
 				var pa = v.split(COOKIE_VALORI_SEP);
 				// Formato del prodotto da aggiungere al cookie
@@ -220,7 +238,7 @@ function ritornaCookieCarrello(idUtente) {
 	var ca = decodedCookie.split(';');
 	var carrello = new Array();
 	// Estrapolazione di tutti i carrelli per ogni fornitore
-  	for(var i = 0; i < ca.length; i++) {
+  	for(let i = 0; i < ca.length; i++) {
     	var c = ca[i];
     	while (c.charAt(0) == ' ')
      		 c = c.substring(1);

@@ -128,10 +128,12 @@
 				function(keyword) {
 					if(keyword != null)		// Ricerca per keyword
 						caricaLista(this, "GET", "CercaKeyword?keyword=" + keyword, 
-							null, this.messaggio);
+							null, messaggio, false, 
+							'Nessun risultato di ricerca per la parola chiave \"' + keyword + '"');
 					else					// Visualizzazione dei prodotti recenti
 						caricaLista(this, "POST", "CaricaVisualizzati", 
-							caricaVisualizzati(), messaggio, true);
+							caricaVisualizzati(), messaggio, true, 
+							"Nessun prodotto visualizzato di recente");
 				}
 			);
 			
@@ -140,7 +142,8 @@
 				document.getElementById("listaCarrello"),
 				function() {
 					caricaLista(this, "POST", "CaricaCarrello", 
-						ritornaCookieCarrello(infoUtente().id), messaggio, true);
+						ritornaCookieCarrello(infoUtente().id), messaggio, true, 
+						"Nessun prodotto all'interno del carrello");
 				}
 			);
 			
@@ -148,33 +151,39 @@
 			this.listaOrdini = new ListaOggetti(this, Ordine,
 				document.getElementById("listaOrdini"),
 				function() {
-					caricaLista(this, "GET", "VisualizzaOrdini", messaggio);
+					caricaLista(this, "GET", "VisualizzaOrdini", messaggio, 
+					"Nessun ordine presente");
 				}
 			);
 			
 		}
 		
-		this.visHome = function() {
+		this.update = function() {
+			// Ogni volta che si aggiorna la pagina, il messaggio precedente viene cancellato
+			this.messaggio.textContent = "";
+			// Ogni volta che si aggiorna la pagina, i contenuti vengono nascosti
 			this.listaCarrello.hide();
 			this.listaOrdini.hide();
+			this.listaRisultati.hide();
+		}
+		
+		this.visHome = function() {
+			this.update();
 			this.listaRisultati.carica(null);
 		}
 		
 		this.visCarrello = function() {
-			this.listaRisultati.hide();
-			this.listaOrdini.hide();
+			this.update();
 			this.listaCarrello.carica();
 		}
 		
 		this.visOrdini = function() {
-			this.listaRisultati.hide();
-			this.listaCarrello.hide();
+			this.update();
 			this.listaOrdini.carica();
 		}
 		
 		this.visRisultati = function(form) {
-			this.listaCarrello.hide();
-			this.listaOrdini.hide();
+			this.update();
 			this.listaRisultati.carica(new FormData(form).get("keyword"));
 		}
 		

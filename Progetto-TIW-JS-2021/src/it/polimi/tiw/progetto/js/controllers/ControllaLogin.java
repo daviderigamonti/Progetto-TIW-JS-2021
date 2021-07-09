@@ -19,6 +19,7 @@ import com.google.gson.GsonBuilder;
 import it.polimi.tiw.progetto.js.beans.Utente;
 import it.polimi.tiw.progetto.js.dao.UtenteDAO;
 import it.polimi.tiw.progetto.js.utils.GestoreConnessione;
+import it.polimi.tiw.progetto.js.utils.ServletErrorResponse;
 
 @WebServlet("/ControllaLogin")
 @MultipartConfig
@@ -58,8 +59,9 @@ public class ControllaLogin extends HttpServlet {
 			if (email == null || psw == null || email.isEmpty() || psw.isEmpty()) 
 				throw new Exception("Credenziali mancanti o inesistenti");
 		} catch (Exception e) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("Credenziali non presenti");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST,
+					"Credenziali non presenti");
 			return;
 		}
 		
@@ -67,15 +69,17 @@ public class ControllaLogin extends HttpServlet {
 		try {
 			usr = usrDao.controllaCredenziali(email, psw);
 		} catch (SQLException e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("Impossibile controllare le credenziali");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+					"Impossibile controllare le credenziali");
 			return;
 		}
 		
 		if (usr == null) {	
 			// Se le credenziali non sono valide viene ritornato un messaggio di errore
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			response.getWriter().println("Credenziali non valide");
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_UNAUTHORIZED, 
+					"Credenziali non valide");
 		} 
 		else {
 			//Se le credenziali sono valide l'utente viene aggiunto alla sessione

@@ -27,7 +27,14 @@ table.tabellaLogin td[colspan="2"] {
 	text-align: center;
 }
 
-.messaggio {
+.messaggioErrore {
 	color: red;
 	text-decoration: underline;
+	text-align: center;
+}
+
+.messaggioNotifica {
+	color: gray;
+	font-weight: bold;
+	text-align: center;
 }
