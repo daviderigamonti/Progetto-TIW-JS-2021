@@ -25,7 +25,7 @@ public class OrdineDAO {
 	}
 	
 	
-	public List<Ordine> prendiOrdiniByIdUtente(int IdUtente) throws SQLException, IdException{  
+	public List<Ordine> prendiOrdiniByIdUtente(int idUtente) throws SQLException, IdException {  
 		//TODO: testare
 		List<Ordine> ordini = new ArrayList<Ordine>();
 		List<Integer> idOrdini = new ArrayList<Integer>();
@@ -33,7 +33,7 @@ public class OrdineDAO {
 		String query = "select Id from ordine ord where ord.IdUtente = ?  order by Data desc"; 
 		
 		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
-			pstatement.setInt(1, IdUtente);
+			pstatement.setInt(1, idUtente);
 			try (ResultSet result = pstatement.executeQuery();) {
 				while (result.next()) {
 					idOrdini.add(result.getInt("Id"));
@@ -52,7 +52,8 @@ public class OrdineDAO {
 		for(Integer idOrdine : idOrdini) {
 
 			Ordine ordine = new Ordine();
-			query = "select * from ordine ord join contenuto co on ord.Id=co.IdOrdine where ord.Id= ? "; 
+			query = "select * from ordine ord join contenuto co on ord.Id=co.IdOrdine "
+					+ "where ord.Id= ? "; 
 			
 			try (PreparedStatement pstatement = connection.prepareStatement(query);) {
 				pstatement.setInt(1, idOrdine);
@@ -61,7 +62,8 @@ public class OrdineDAO {
 						throw new IdException();
 					List<Prodotto> prodotti = new ArrayList<>();
 					while (result.next()) {
-						Prodotto prodotto = prodottoDAO.prendiProdottoByIdProdottoFornitore(Integer.parseInt(result.getString("IdProdotto")), 
+						Prodotto prodotto = prodottoDAO.prendiProdottoByIdProdottoFornitore(
+								Integer.parseInt(result.getString("IdProdotto")), 
 								Integer.parseInt(result.getString("IdFornitore")));
 						prodotto.setQuantita(Integer.parseInt(result.getString("Quantita")));
 						prodotti.add(prodotto);
@@ -86,11 +88,13 @@ public class OrdineDAO {
 	}
 	
 	
-	public void aggiungiOrdine(float totale, int idIndirizzo, int idUtente, int idFornitore, List<Prodotto> prodotti) throws SQLException{
+	public void aggiungiOrdine(float totale, int idIndirizzo, int idUtente, int idFornitore, 
+			List<Prodotto> prodotti) throws SQLException {
 		
 		int idOrdineNuovo = prendiProssimoId();
 		
-		String query = "INSERT INTO ordine (Id, Totale, Data, IdIndirizzo, IdUtente, IdFornitore) VALUES( ? , ? , CURDATE() , ? , ? , ? ) ";
+		String query = "INSERT INTO ordine (Id, Totale, Data, IdIndirizzo, IdUtente, IdFornitore) "
+				+ "VALUES( ? , ? , CURDATE() , ? , ? , ? ) ";
 		
 		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
 			
@@ -103,7 +107,8 @@ public class OrdineDAO {
 			pstatement.executeUpdate(); 
 				
 			for(Prodotto p : prodotti) {
-				query = "INSERT INTO contenuto (IdOrdine, IdProdotto, Quantita) VALUES( ? , ? , ? ) ";
+				query = "INSERT INTO contenuto (IdOrdine, IdProdotto, Quantita) "
+						+ "VALUES( ? , ? , ? ) ";
 				try (PreparedStatement pstatement2 = connection.prepareStatement(query);) {
 					pstatement2.setInt(1, idOrdineNuovo);
 					pstatement2.setInt(2, p.getID());
@@ -115,7 +120,7 @@ public class OrdineDAO {
 	}
 	
 	
-	public int prendiProssimoId() throws SQLException{ //per scegliere nuovo id per l'ordine
+	public int prendiProssimoId() throws SQLException { //per scegliere nuovo id per l'ordine
 		String query = "select max(Id) as Id from ordine "; 
 		
 		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
@@ -123,7 +128,7 @@ public class OrdineDAO {
 				if (!result.isBeforeFirst()) // no results
 					return 1;
 				if (result.next()) {
-					return result.getInt("Id")+1;
+					return result.getInt("Id") + 1;
 				}
 			}
 		}

@@ -21,7 +21,8 @@ public class ProdottoDAO {
 		this.connection = connection;
 	}
 	
-	public List<Prodotto> prendiProdotti(Collection<Integer> presenti, int quantita) throws SQLException {
+	public List<Prodotto> prendiProdotti(Collection<Integer> presenti, int quantita) 
+			throws SQLException {
 		List<Prodotto> prodotti = new ArrayList<Prodotto>();
 		String query;
 		boolean valido = presenti!=null && !presenti.isEmpty();
@@ -32,13 +33,16 @@ public class ProdottoDAO {
 			}
 			query = "select * "
 					+ "from prodotto p join vendita v1 on p.Id=v1.IdProdotto "
-					+ "where Categoria = ? and Id not in ("+valoriNotIn+") and Prezzo =	(select min(Prezzo) from vendita v2	where v2.IdProdotto = v1.IdProdotto) "
+					+ "where Categoria = ? and Id not in (" + valoriNotIn + ") and " 
+							+ "Prezzo =	(select min(Prezzo) from vendita v2	"
+							+ "where v2.IdProdotto = v1.IdProdotto) "
 					+ "order by RAND() limit ?"; 
 		}
 		else {
 			query = "select * "
 				+ "from prodotto p join vendita v1 on p.Id=v1.IdProdotto "
-				+ "where Categoria = ? and Prezzo =	(select min(Prezzo) from vendita v2	where v2.IdProdotto = v1.IdProdotto) "
+				+ "where Categoria = ? and Prezzo =	(select min(Prezzo) "
+				+ "from vendita v2	where v2.IdProdotto = v1.IdProdotto) "
 				+ "order by RAND() limit ?"; 
 		}
 		

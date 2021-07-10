@@ -15,7 +15,7 @@ public class IndirizzoDAO {
 		this.connection = connection;
 	}
 
-	public int prendiIdIndirizzoByParam(String citta, String via, String cap, int numero) throws SQLException{
+	public int prendiIdIndirizzoByParam(String citta, String via, String cap, int numero) throws SQLException {
 		int idDaRitornare = -1;
 		String query = "select Id "
 				+ "from indirizzo ind "
@@ -40,19 +40,19 @@ public class IndirizzoDAO {
 		return idDaRitornare; 
 	}
 	
-	public Indirizzo prendiIndirizzoById(int Id) throws SQLException, IdException{
+	public Indirizzo prendiIndirizzoById(int id) throws SQLException, IdException {
 		Indirizzo indirizzo = new Indirizzo();
 		String query = "select * "
 				+ "from indirizzo ind "
 				+ "where ind.Id= ? "; 
 		
 		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
-			pstatement.setInt(1, Id);
+			pstatement.setInt(1, id);
 			try (ResultSet result = pstatement.executeQuery();) {
 				if (!result.isBeforeFirst()) // no results
 					throw new IdException();
 				if (result.next()) {
-					indirizzo.setId(Id);
+					indirizzo.setId(id);
 					indirizzo.setCitta(result.getString("Citta"));
 					indirizzo.setVia(result.getString("Via"));
 					indirizzo.setCap(result.getString("Cap"));
@@ -63,7 +63,7 @@ public class IndirizzoDAO {
 		return indirizzo; 
 	}
 	
-	public void aggiungiIndirizzo(String citta, String via, String cap, int numero) throws SQLException{
+	public void aggiungiIndirizzo(String citta, String via, String cap, int numero) throws SQLException {
 		String query = "INSERT INTO indirizzo (Citta, Via, Cap, Numero) VALUES( ? , ? , ? , ? )";
 		
 			try (PreparedStatement pstatement = connection.prepareStatement(query);) {
