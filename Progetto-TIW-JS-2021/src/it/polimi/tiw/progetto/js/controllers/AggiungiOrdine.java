@@ -106,7 +106,7 @@ public class AggiungiOrdine extends HttpServlet {
 			
 			for (Prodotto p : carrello.getProdotti())
 				if(p.getQuantita() < 1  || p.getQuantita() > 999)
-					throw new Exception("Quantit‡† di prodotti non valida");
+					throw new Exception("Quantit√† di prodotti non valida");
 			
 		} catch (JsonSyntaxException e) {
 			ServletErrorResponse.createResponse(response, 

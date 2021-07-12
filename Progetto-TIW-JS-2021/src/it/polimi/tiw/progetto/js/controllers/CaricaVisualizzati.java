@@ -67,7 +67,7 @@ public class CaricaVisualizzati extends HttpServlet{
 			return;
 		}
 		
-		// Recupera i prodotti gi‡† visualizzati dal database
+		// Recupera i prodotti gi√† visualizzati dal database
 		if (!listaVisualizzati.isEmpty()) {
 			Collections.reverse(listaVisualizzati);
 			for (Integer id : listaVisualizzati)
@@ -76,12 +76,12 @@ public class CaricaVisualizzati extends HttpServlet{
 				} catch (SQLException e) {
 					ServletErrorResponse.createResponse(response, 
 							HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
-							"Impossibile recuperare prodotti gi‡† visualizzati");
+							"Impossibile recuperare prodotti gi√† visualizzati");
 					return;
 				} catch (IdException e) {
 					ServletErrorResponse.createResponse(response, 
 							HttpServletResponse.SC_BAD_REQUEST, 
-							"Prodotti gi‡† visualizzati non esistenti");
+							"Prodotti gi√† visualizzati non esistenti");
 					return;
 				}
 		}
