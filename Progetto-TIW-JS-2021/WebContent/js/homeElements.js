@@ -530,10 +530,11 @@ function Offerta(gestore, listaOfferte) {
 		bottoneCarrello.value = "Inserisci";
 		bottoneCarrello.addEventListener("click", (e) => {
 			var form = e.target.closest("form");
-			if(form.checkValidity() && 
-					form.quantita.value != "" && Number(form.quantita.value) > 0) {
+			form.quantita.setCustomValidity("");
+			if(form.checkValidity() && form.quantita.value != "" && 
+					!isNan(Number(form.quantita.value))) {
 				if(controllaAggiungiCookieProdotto(infoUtente().id, offerta.fornitore.ID, 
-					offerta.ID, form.quantita.value)) {
+					offerta.ID, form.quantita.value) && Number(form.quantita.value) > 0) {
 					// Se il form è valido i prodotti selezionati vengono aggiunti al carrello 
 					// tramite cookie e viene visualizzato il carrello
 					aggiungiCookieProdotto(infoUtente().id, offerta.fornitore.ID, 
@@ -543,10 +544,9 @@ function Offerta(gestore, listaOfferte) {
 				else {
 					// Messaggio custom nel caso la quantità di prodotti superi la soglia
 					form.quantita.setCustomValidity("La quantità di prodotti selezionata "
-						+ "supererebbe la soglia massima di prodotti nel carrello " 
-						+ "(" + SOGLIA_PRODOTTI + ")");
-					form.reportValidity();
-					form.quantita.setCustomValidity("");
+						+ "supererebbe la soglia massima (" + SOGLIA_PRODOTTI + ") o minima (1) " + 
+						"di prodotti nel carrello ");
+					form.quantita.reportValidity();
 				}
 			}
 			else
