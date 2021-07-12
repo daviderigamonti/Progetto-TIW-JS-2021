@@ -532,7 +532,7 @@ function Offerta(gestore, listaOfferte) {
 			var form = e.target.closest("form");
 			form.quantita.setCustomValidity("");
 			if(form.checkValidity() && form.quantita.value != "" && 
-					!isNan(Number(form.quantita.value))) {
+					!isNaN(Number(form.quantita.value))) {
 				if(controllaAggiungiCookieProdotto(infoUtente().id, offerta.fornitore.ID, 
 					offerta.ID, form.quantita.value) && Number(form.quantita.value) > 0) {
 					// Se il form è valido i prodotti selezionati vengono aggiunti al carrello 
