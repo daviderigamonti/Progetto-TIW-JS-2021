@@ -151,7 +151,7 @@
 			this.listaOrdini = new ListaOggetti(this, Ordine,
 				document.getElementById("listaOrdini"),
 				function() {
-					caricaLista(this, "GET", "VisualizzaOrdini", messaggio, 
+					caricaLista(this, "GET", "VisualizzaOrdini", null, messaggio, false,
 					"Nessun ordine presente");
 				}
 			);
