@@ -82,6 +82,7 @@
 				makeCall("GET", "Logout", null, gestore.messaggio, () => {
 					// Routine di logout
 					window.sessionStorage.removeItem(SESSIONE_UTENTE);
+					window.sessionStorage.removeItem(SESSIONE_VISUALIZZATI);
 					window.location.href = DEFAULT_PAGE;
 				});
 			})

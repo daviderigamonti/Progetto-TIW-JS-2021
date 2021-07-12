@@ -11,6 +11,7 @@
 			makeCall("POST", "ControllaLogin", new FormData(form), messaggio, function(req) {
 				var utente = JSON.parse(req.responseText);
 				window.sessionStorage.setItem(SESSIONE_UTENTE, JSON.stringify(utente));
+				window.sessionStorage.setItem(SESSIONE_VISUALIZZATI, JSON.stringify(new Array()));
 				window.location.href = "home.html";
 			}, null, true);
 		}

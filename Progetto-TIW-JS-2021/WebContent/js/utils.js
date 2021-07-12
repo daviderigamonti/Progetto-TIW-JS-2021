@@ -13,6 +13,7 @@ const HTTP_CODES = {
 const ENTER_KEY_CODE = "Enter";
 
 const SESSIONE_UTENTE = "utente";
+const SESSIONE_VISUALIZZATI = "listaVisualizzati";
 
 const COOKIE_VALORI_SEP = "-";
 const COOKIE_PRODOTTI_SEP = "_";
@@ -50,6 +51,7 @@ function makeCall(httpMethod, url, data, responseTag, callBack, json, login) {
 					// per visualizzare una determinata risorsa, viene rispedito alla pagina 
 					// di default (a meno che l'utente non stia tentando di autenticarsi)
 					window.sessionStorage.removeItem(SESSIONE_UTENTE);
+					window.sessionStorage.removeItem(SESSIONE_VISUALIZZATI);
 	          		window.location.href = DEFAULT_PAGE;
 			}
 			else {
@@ -114,7 +116,7 @@ function infoUtente() {
  * @param {Number} id Id del prodotto visualizzato dall'utente
  */
 function aggiungiVisualizzato(id) {
-	var listaVisualizzati = window.sessionStorage.getItem("listaVisualizzati");
+	var listaVisualizzati = window.sessionStorage.getItem(SESSIONE_VISUALIZZATI);
 	// Se nella sessione non è presente la lista viene creato e aggiunto un array vuoto
 	if(listaVisualizzati === null || listaVisualizzati === undefined) {
 		listaVisualizzati = new Array();
@@ -134,18 +136,18 @@ function aggiungiVisualizzato(id) {
 			listaVisualizzati.shift();
 		listaVisualizzati.push(id);
 	}
-	window.sessionStorage.setItem("listaVisualizzati", JSON.stringify(listaVisualizzati));
+	window.sessionStorage.setItem(SESSIONE_VISUALIZZATI, JSON.stringify(listaVisualizzati));
 }
 
 /**
  * Carica tutti i prodotti visualizzati presenti all'interno della sessione corrente
  */
 function caricaVisualizzati() {
-	var listaVisualizzati = window.sessionStorage.getItem("listaVisualizzati");
+	var listaVisualizzati = window.sessionStorage.getItem(SESSIONE_VISUALIZZATI);
 	// Se nella sessione non è presente la lista viene creato e aggiunto un array vuoto
 	if(listaVisualizzati === null || listaVisualizzati === undefined) {
 		listaVisualizzati = new Array();
-		window.sessionStorage.setItem("listaVisualizzati", JSON.stringify(listaVisualizzati));
+		window.sessionStorage.setItem(SESSIONE_VISUALIZZATI, JSON.stringify(listaVisualizzati));
 		listaVisualizzati = JSON.stringify(listaVisualizzati);
 	}
 	return listaVisualizzati;
