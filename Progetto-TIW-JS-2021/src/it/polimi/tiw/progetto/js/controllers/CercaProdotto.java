@@ -49,8 +49,19 @@ public class CercaProdotto extends HttpServlet{
 		// Recupera un prodotto dal database dato il suo id
 		try {
 			idProdotto = StringEscapeUtils.escapeJava(request.getParameter("idProdotto"));
-			if (idProdotto != null && !idProdotto.equals(""))
-					offerte = prodottoDAO.prendiOfferteByIdProdotto(Integer.parseInt(idProdotto));
+			if (idProdotto != null && !idProdotto.equals("")) {
+				
+				try {
+					Integer.parseInt(idProdotto);
+				} catch (NumberFormatException e) {
+					ServletErrorResponse.createResponse(response, 
+							HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+							"Richiesta malformata");
+					return;
+			    }
+
+				offerte = prodottoDAO.prendiOfferteByIdProdotto(Integer.parseInt(idProdotto));
+			}
 		} catch (SQLException e) {
 			ServletErrorResponse.createResponse(response, 
 					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 

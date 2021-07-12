@@ -92,9 +92,21 @@ public class AggiungiOrdine extends HttpServlet {
 			if (citta == null || citta.isEmpty() || via == null || via.isEmpty() || 
 					cap == null || cap.isEmpty() || numero == null || numero.isEmpty())
 						throw new Exception("Campi indirizzo assenti");
+			
+			try {
+				Integer.parseInt(numero);
+				Integer.parseInt(cap);
+			} catch (NumberFormatException e) {
+				ServletErrorResponse.createResponse(response, 
+						HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
+						"Richiesta malformata");
+				return;
+		    }
+
+			
 			for (Prodotto p : carrello.getProdotti())
 				if(p.getQuantita() < 1  || p.getQuantita() > 999)
-					throw new Exception("Quantit√† di prodotti non valida");
+					throw new Exception("Quantit‡† di prodotti non valida");
 			
 		} catch (JsonSyntaxException e) {
 			ServletErrorResponse.createResponse(response, 

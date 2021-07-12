@@ -307,7 +307,7 @@ function Carrello(gestore, listaCarrelli, display) {
 			
 			testoNumero = document.createElement("input");
 			testoNumero.name = "numero";
-			testoNumero.type = "number";
+			testoNumero.type = "text";
 			testoNumero.value = indirizzo.numero;
 			formSpedizione.appendChild(testoNumero);
 			
@@ -320,7 +320,7 @@ function Carrello(gestore, listaCarrelli, display) {
 			
 			testoCAP = document.createElement("input");
 			testoCAP.name = "cap";
-			testoCAP.type = "number";
+			testoCAP.type = "text";
 			testoCAP.value = indirizzo.cap;
 			formSpedizione.appendChild(testoCAP);
 			
