@@ -20,6 +20,7 @@ import com.google.gson.GsonBuilder;
 import it.polimi.tiw.progetto.js.beans.Prodotto;
 import it.polimi.tiw.progetto.js.dao.ProdottoDAO;
 import it.polimi.tiw.progetto.js.utils.GestoreConnessione;
+import it.polimi.tiw.progetto.js.utils.IdException;
 import it.polimi.tiw.progetto.js.utils.ServletErrorResponse;
 
 @WebServlet("/CercaProdotto")
@@ -55,10 +56,15 @@ public class CercaProdotto extends HttpServlet{
 					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
 					"Impossibile recuperare prodotti da id");
 			return;
+		} catch (IdException e) {
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST, 
+					"Id prodotto non esistente");
+			return;
 		} catch (Exception e) {
 			ServletErrorResponse.createResponse(response, 
 					HttpServletResponse.SC_BAD_REQUEST, 
-					"Id non esistente");
+					"Richiesta malformata");
 			return;
 		}
 		

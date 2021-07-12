@@ -123,7 +123,7 @@ table.barraMenu input.bottoneNav {
 	width: 100%;
 }
 
-.divInfoOfferta div, .divInfoOfferta form {
+.divInfoOfferta div:not(.overlay), .divInfoOfferta form {
 	display: inline;
 	vertical-align: 2em;
 	margin-bottom: 2.2em;

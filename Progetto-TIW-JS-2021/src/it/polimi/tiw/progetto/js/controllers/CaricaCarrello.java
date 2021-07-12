@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 import it.polimi.tiw.progetto.js.beans.Carrello;
 import it.polimi.tiw.progetto.js.beans.Prodotto;
@@ -63,6 +64,15 @@ public class CaricaCarrello extends HttpServlet{
 			carrelli = Arrays.asList(gson.fromJson(postContent, Carrello[].class));
 			if (carrelli == null) 
 				throw new Exception("Richiesta malformata");
+			for (Carrello c : carrelli)
+				for (Prodotto p : c.getProdotti()) 
+					if(p.getQuantita() < 1  || p.getQuantita() > 999)
+						throw new Exception("Quantità di prodotti non valida");
+		} catch (JsonSyntaxException e) {
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST, 
+					"Richiesta malformata");
+			return;
 		} catch (Exception e) {
 			ServletErrorResponse.createResponse(response, 
 					HttpServletResponse.SC_BAD_REQUEST, 

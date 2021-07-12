@@ -19,6 +19,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 import it.polimi.tiw.progetto.js.beans.Carrello;
 import it.polimi.tiw.progetto.js.beans.Prodotto;
@@ -91,7 +92,15 @@ public class AggiungiOrdine extends HttpServlet {
 			if (citta == null || citta.isEmpty() || via == null || via.isEmpty() || 
 					cap == null || cap.isEmpty() || numero == null || numero.isEmpty())
 						throw new Exception("Campi indirizzo assenti");
+			for (Prodotto p : carrello.getProdotti())
+				if(p.getQuantita() < 1  || p.getQuantita() > 999)
+					throw new Exception("Quantità di prodotti non valida");
 			
+		} catch (JsonSyntaxException e) {
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST, 
+					"Richiesta malformata");
+			return;
 		} catch (Exception e) {
 			ServletErrorResponse.createResponse(response, 
 					HttpServletResponse.SC_BAD_REQUEST, 

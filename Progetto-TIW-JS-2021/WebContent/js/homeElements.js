@@ -242,29 +242,30 @@ function Carrello(gestore, listaCarrelli, display) {
 			
 		});
 		
-		if(!display) {
-			riga1 = document.createElement("tr");
-			tBodyCarrello.appendChild(riga1);
-			
-			riga2 = document.createElement("tr");
-			tBodyCarrello.appendChild(riga2);
-			
-			riga3 = document.createElement("tr");
-			tBodyCarrello.appendChild(riga3);
-			
-			// Informazioni sul singolo ordine del carrello (totale e prezzo di spedizione)
-			cellaTotale = document.createElement("td");
-			cellaTotale.textContent = "Totale: " + carrello.totaleCosto.toFixed(2) + " \u20AC";
-			cellaTotale.colSpan = "4";
-			riga1.appendChild(cellaTotale);
-			
-			cellaPrezzoSpedizione = document.createElement("td");
+		
+		riga1 = document.createElement("tr");
+		tBodyCarrello.appendChild(riga1);
+		
+		riga2 = document.createElement("tr");
+		tBodyCarrello.appendChild(riga2);
+		
+		// Informazioni sul singolo ordine del carrello (totale e prezzo di spedizione)
+		cellaTotale = document.createElement("td");
+		cellaTotale.textContent = "Totale: " + carrello.totaleCosto.toFixed(2) + " \u20AC";
+		cellaTotale.colSpan = "4";
+		riga1.appendChild(cellaTotale);
+		
+		cellaPrezzoSpedizione = document.createElement("td");
 			cellaPrezzoSpedizione.textContent = "Spedizione: " + 
 				carrello.costoSpedizione.toFixed(2) + " \u20AC";
 			cellaPrezzoSpedizione.colSpan = "4";
 			riga2.appendChild(cellaPrezzoSpedizione);
+
+		if(!display) {	
+			riga3 = document.createElement("tr");
+			tBodyCarrello.appendChild(riga3);
 			
-			// Form per la personalizzazione della spedizione	TODO: metodo a parte(?)
+			// Form per la personalizzazione della spedizione
 			cellaSpedizione = document.createElement("td");
 			cellaSpedizione.colSpan = "4";
 			riga3.appendChild(cellaSpedizione);
@@ -375,7 +376,7 @@ function Offerta(gestore, listaOfferte) {
 
 		var rigaOff = new Array();
 		var divOfferta, tabellaOfferta, tHeadOfferta, rigaHead, tBodyOfferta, cellaFornitore, 
-		divInfo, divSoglia, divNCarrello, divOverlayCarrello, divPrezzoCarrello, formCarrello, 
+		divInfo, divSoglia, divNCarrello, divOverlayCarrello, formCarrello, 
 		numeroCarrello, bottoneCarrello;
 		
 		divOfferta = document.createElement("div");
@@ -481,7 +482,8 @@ function Offerta(gestore, listaOfferte) {
 				// Il contenuto dell'overlay è ottenuto tramite una chiamata al server per la
 				// visualizzazione del contenuto di un carrello specifico
 				caricaLista(this, "POST", "CaricaCarrello", 
-					ritornaCookieCarrelloDaFornitore(infoUtente().id, offerta.fornitore.ID), true);
+					ritornaCookieCarrelloDaFornitore(infoUtente().id, offerta.fornitore.ID), 
+					gestore.messaggio, true);
 			},
 		true);
 		
@@ -489,23 +491,21 @@ function Offerta(gestore, listaOfferte) {
 		divNCarrello.addEventListener("mouseenter", () => {
 			// Se l'overlay deve essere aperto, viene aggiornato con i contenuti del carrello
 			divOverlayCarrello.hidden = false;
+			listaOverlay.show();
 			listaOverlay.carica();
 		}, false);
 		divNCarrello.addEventListener("mouseleave", () => {
 			divOverlayCarrello.hidden = true;
+			listaOverlay.hide();
 		}, false);
 		divOverlayCarrello.addEventListener("mouseleave", () => {
 			divOverlayCarrello.hidden = true;
+			listaOverlay.hide();
 		}, false);
 
 		divInfo.appendChild(divNCarrello);
 		divNCarrello.appendChild(divOverlayCarrello);
-		
-		divPrezzoCarrello = document.createElement("div");
-		divPrezzoCarrello.textContent =	"Valore dei prodotti gi\xE1 nel carrello: " + 
-			offerta.valore + " \u20AC";
-		divInfo.appendChild(divPrezzoCarrello);
-		
+
 		// Form per l'aggiunta dell'offerta al carrello
 		formCarrello = document.createElement("form");
 		formCarrello.action = "#";
@@ -517,6 +517,7 @@ function Offerta(gestore, listaOfferte) {
 		numeroCarrello.type = "number";
 		numeroCarrello.min = "1";
 		numeroCarrello.value = "1";
+		numeroCarrello.required = true;
 		numeroCarrello.addEventListener("keypress", (e) => {
 			if (e.code === ENTER_KEY_CODE)
 				e.preventDefault();	// Previene l'invio del form dalla number box 
@@ -529,7 +530,8 @@ function Offerta(gestore, listaOfferte) {
 		bottoneCarrello.value = "Inserisci";
 		bottoneCarrello.addEventListener("click", (e) => {
 			var form = e.target.closest("form");
-			if(form.checkValidity()) {
+			if(form.checkValidity() && 
+					form.quantita.value != "" && Number(form.quantita.value) > 0) {
 				if(controllaAggiungiCookieProdotto(infoUtente().id, offerta.fornitore.ID, 
 					offerta.ID, form.quantita.value)) {
 					// Se il form è valido i prodotti selezionati vengono aggiunti al carrello 

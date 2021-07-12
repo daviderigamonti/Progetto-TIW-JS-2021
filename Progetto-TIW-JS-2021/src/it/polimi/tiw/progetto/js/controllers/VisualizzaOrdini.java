@@ -59,6 +59,11 @@ public class VisualizzaOrdini extends HttpServlet{
 					HttpServletResponse.SC_BAD_REQUEST, 
 					"Id utente non esistente");
 			return;
+		} catch (Exception e) {
+			ServletErrorResponse.createResponse(response, 
+					HttpServletResponse.SC_BAD_REQUEST, 
+					"Richiesta malformata");
+			return;
 		}
 		
 		String json = gson.toJson(ordiniDaMostrare);

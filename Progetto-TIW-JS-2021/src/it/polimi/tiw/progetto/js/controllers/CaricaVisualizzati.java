@@ -63,7 +63,7 @@ public class CaricaVisualizzati extends HttpServlet{
 		} catch (Exception e) {
 			ServletErrorResponse.createResponse(response, 
 					HttpServletResponse.SC_BAD_REQUEST, 
-					e.getMessage());
+					"Richiesta malformata");
 			return;
 		}
 		
