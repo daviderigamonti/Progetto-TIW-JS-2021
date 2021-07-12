@@ -15,7 +15,8 @@ public class IndirizzoDAO {
 		this.connection = connection;
 	}
 
-	public int prendiIdIndirizzoByParam(String citta, String via, String cap, int numero) throws SQLException {
+	public int prendiIdIndirizzoByParam(String citta, String via, String cap, int numero) 
+			throws SQLException {
 		int idDaRitornare = -1;
 		String query = "select Id "
 				+ "from indirizzo ind "
@@ -30,8 +31,7 @@ public class IndirizzoDAO {
 				if (result.next()) {
 					idDaRitornare = (result.getInt("Id"));
 				}
-				else
-				{
+				else {
 					aggiungiIndirizzo(citta, via, cap, numero);
 					return prendiIdIndirizzoByParam(citta, via, cap, numero);
 				}
@@ -63,10 +63,11 @@ public class IndirizzoDAO {
 		return indirizzo; 
 	}
 	
-	public void aggiungiIndirizzo(String citta, String via, String cap, int numero) throws SQLException {
+	public void aggiungiIndirizzo(String citta, String via, String cap, int numero) 
+			throws SQLException {
 		String query = "INSERT INTO indirizzo (Citta, Via, Cap, Numero) VALUES( ? , ? , ? , ? )";
 		
-			try (PreparedStatement pstatement = connection.prepareStatement(query);) {
+		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
 			pstatement.setString(1, citta);
 			pstatement.setString(2, via);
 			pstatement.setString(3, cap);

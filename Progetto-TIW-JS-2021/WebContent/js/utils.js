@@ -20,6 +20,8 @@ const COOKIE_DELETE = "=; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 
 const DEFAULT_PAGE = "login.html";
 
+const SOGLIA_PRODOTTI = 999;
+
 
 /**
  * Makes a call to the server, utilizing the XMLHttpRequest object
@@ -143,11 +145,39 @@ function caricaVisualizzati() {
 	// Se nella sessione non è presente la lista viene creato e aggiunto un array vuoto
 	if(listaVisualizzati === null || listaVisualizzati === undefined) {
 		listaVisualizzati = new Array();
-		window.sessionStorage.setItem(	"listaVisualizzati", 
-										JSON.stringify(listaVisualizzati));
+		window.sessionStorage.setItem("listaVisualizzati", JSON.stringify(listaVisualizzati));
 		listaVisualizzati = JSON.stringify(listaVisualizzati);
 	}
 	return listaVisualizzati;
+}
+
+/**
+ * Controlla se è possibile aggiungere un prodotto all'interno del carrello tramite cookie
+ * data la sua quantità
+ * @param {Number} idUtente Codice identificativo dell'utente
+ * @param {Number} idFornitore Codice identificativo del fornitore
+ * @param {Number} idProdotto Codice identificativo del prodotto
+ * @param {Number} quantita Quantità dei prodotti selezionati
+ */
+function controllaAggiungiCookieProdotto(idUtente, idFornitore, idProdotto, quantita) {
+	// Se la quantità del singolo prodotto è superiore a SOGLIA_PRODOTTI di sicuro supera la soglia
+	if(quantita > SOGLIA_PRODOTTI)
+		return false;
+		
+	var prodotti = ritornaCookieProdotti(idUtente, idFornitore);
+	
+	if(prodotti)
+		for(let i = 0; i < prodotti.length; i++) {
+			// Controllo se supera la soglia sommando le quantità
+			if(prodotti[i].ID == idProdotto) {
+				var q = Number(prodotti[i].quantita);
+				if(q + Number(quantita) > SOGLIA_PRODOTTI)
+					return false;
+				else
+					break;
+			}
+		}
+	return true;
 }
 
 /**

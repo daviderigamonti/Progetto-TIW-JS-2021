@@ -19,9 +19,8 @@ public class FornitoreDAO {
 		this.connection = connection;
 	}
 	
-	public Fornitore prendiFornitoreById(int id) throws SQLException, IdException{
-		//TODO: query da cambiare? 
-		String query = "select * from fornitore f join politica po on po.Id=f.IdPoliticaForn "  //TODO: da testare
+	public Fornitore prendiFornitoreById(int id) throws SQLException, IdException {
+		String query = "select * from fornitore f join politica po on po.Id=f.IdPoliticaForn "
 				+ "where f.Id= ? "; 
 		Fornitore fornitore = new Fornitore();
 		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
@@ -32,7 +31,8 @@ public class FornitoreDAO {
 				while (result.next()) {
 					fornitore.setNome(result.getString("NomeFor"));
 					fornitore.setValutazione(result.getString("Valutazione"));
-					fornitore.setSoglia((result.getString("Soglia") == null) ? -1 : Integer.parseInt(result.getString("Soglia")));
+					fornitore.setSoglia((result.getString("Soglia") == null) ? -1 
+							: Integer.parseInt(result.getString("Soglia")));
 					fornitore.setID(result.getInt("Id"));
 				}
 			}
@@ -40,12 +40,14 @@ public class FornitoreDAO {
 		
 		List<Range> fasce = new ArrayList<Range>();
 		query = "select * from fornitore fo, politica po, fascia fa, composizione co "
-				+ "where po.Id=fo.IdPoliticaForn and fa.IdFascia=co.IdFasceComp and co.IdPoliticaComp=po.Id and fo.Id = ?"; 
+				+ "where po.Id=fo.IdPoliticaForn and fa.IdFascia=co.IdFasceComp and "
+				+ "co.IdPoliticaComp=po.Id and fo.Id = ?"; 
 		try (PreparedStatement pstatement = connection.prepareStatement(query);) {
 			pstatement.setInt(1, id);
 			try (ResultSet result = pstatement.executeQuery();) {
 				while (result.next()) {
-					Range fascia = new Range(result.getInt("IdFascia"),result.getInt("Min"),result.getInt("Max"),result.getInt("Prezzo"));
+					Range fascia = new Range(result.getInt("IdFascia"), result.getInt("Min"), 
+							result.getInt("Max"), result.getInt("Prezzo"));
 					fasce.add(fascia);
 				}
 			}

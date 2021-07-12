@@ -16,7 +16,8 @@ public class UtenteDAO {
 	}
 
 	public Utente controllaCredenziali(String email, String psw) throws SQLException {
-		String query = "SELECT  * FROM utente u join indirizzo ind on ind.Id=u.IdIndirizzo WHERE email = ? AND password =?";
+		String query = "SELECT  * FROM utente u join indirizzo ind on ind.Id=u.IdIndirizzo "
+				+ "WHERE email = ? AND password =?";
 		try (PreparedStatement pstatement = con.prepareStatement(query);) {
 			pstatement.setString(1, email);
 			pstatement.setString(2, psw);
